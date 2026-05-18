@@ -916,12 +916,14 @@ if(CBF_ENABLE_FORTRAN)
   add_executable(test_fcb_read_image
     "${CMAKE_CURRENT_BINARY_DIR}/src/test_fcb_read_image.f90")
   target_link_libraries(test_fcb_read_image
-    fcb)
+    fcb
+    "${libm}")
 
   add_executable(test_xds_binary
     "${CMAKE_CURRENT_BINARY_DIR}/src/test_xds_binary.f90")
   target_link_libraries(test_xds_binary
-    fcb)
+    fcb
+    "${libm}")
 
 
   # Use the pre-generated SWIG wrapper, because current SWIG does not
@@ -930,7 +932,8 @@ if(CBF_ENABLE_FORTRAN)
     "${CMAKE_CURRENT_SOURCE_DIR}/f90cbf/f90cbf.f90"
     "${CMAKE_CURRENT_SOURCE_DIR}/f90cbf/f90cbf_wrap.c")
   target_link_libraries(f90cbf
-    cbf)
+    cbf
+    "${libm}")
 endif()
 
 
@@ -974,7 +977,8 @@ if(BUILD_SHARED_LIBS AND CBF_ENABLE_JAVA)
     PRIVATE "${JAVA_INCLUDE_PATH}"
             "${JAVA_INCLUDE_PATH2}")
   target_link_libraries(cbf_wrap
-    PRIVATE cbf)
+    PRIVATE cbf
+    "${libm}")
 
   set(_java_files_generated
     "${CMAKE_CURRENT_BINARY_DIR}/jcbf/CBF_NODETYPE.java"
@@ -1009,7 +1013,8 @@ if(BUILD_SHARED_LIBS AND CBF_ENABLE_JAVA)
   add_executable(ctestcbf
     "${CBF__EXAMPLES}/testcbf.c")
   target_link_libraries(ctestcbf
-    cbf)
+    cbf
+    "${libm}")
 
   add_jar(testcbf
     "${CBF__EXAMPLES}/testcbf.java"
@@ -1124,23 +1129,27 @@ add_executable(tiff2cbf
   "${CBF__EXAMPLES}/tiff2cbf.c")
 target_link_libraries(tiff2cbf
   cbf
-  tiff)
+  tiff
+  "${libm}")
 
 add_executable(cbf2nexus
   "${CBF__EXAMPLES}/cbf2nexus.c")
 target_link_libraries(cbf2nexus
-  cbf)
+  cbf
+  "${libm}")
 
 add_executable(nexus2cbf
   "${CBF__EXAMPLES}/nexus2cbf.c")
 target_link_libraries(nexus2cbf
   cbf
-  hdf5)
+  hdf5
+  "${libm}")
 
 add_executable(minicbf2nexus
   "${CBF__EXAMPLES}/minicbf2nexus.c")
 target_link_libraries(minicbf2nexus
-  cbf)
+  cbf
+  "${libm}")
 
 add_executable(adscimg2cbf
   "${CBF__EXAMPLES}/adscimg2cbf.c"
@@ -1158,21 +1167,27 @@ target_link_libraries(cbf2adscimg
 
 add_executable(convert_f90_swig_wrap
   "${CBF__EXAMPLES}/convert_f90_swig_wrap.cpp")
+target_link_libraries(convert_f90_swig_wrap
+  cbf
+  "${libm}")
 
 add_executable(convert_image
   "${CBF__EXAMPLES}/convert_image.c")
 target_link_libraries(convert_image
-  cbf)
+  cbf
+  "${libm}")
 
 add_executable(convert_minicbf
   "${CBF__EXAMPLES}/convert_minicbf.c")
 target_link_libraries(convert_minicbf
-  cbf)
+  cbf
+  "${libm}")
 
 add_executable(makecbf
   "${CBF__EXAMPLES}/makecbf.c")
 target_link_libraries(makecbf
-  cbf)
+  cbf
+  "${libm}")
 
 add_executable(cbf_standardize_numbers
   "${CBF__EXAMPLES}/cbf_standardize_numbers.c")
@@ -1187,7 +1202,8 @@ endif()
 add_executable(cbf_tail
   "${CBF__EXAMPLES}/cbf_tail.c")
 target_link_libraries(cbf_tail
-  cbf)
+  cbf
+  "${libm}")
 
 add_executable(cbf_testxfelread
   "${CBF__EXAMPLES}/cbf_testxfelread.c")
@@ -1198,12 +1214,14 @@ target_link_libraries(cbf_testxfelread
 add_executable(changtestcompression
   "${CBF__EXAMPLES}/changtestcompression.c")
 target_link_libraries(changtestcompression
-  cbf)
+  cbf
+  "${libm}")
 
 add_executable(img2cif
   "${CBF__EXAMPLES}/img2cif.c")
 target_link_libraries(img2cif
-  cbf)
+  cbf
+  "${libm}")
 
 add_executable(cif2cbf
   "${CBF__EXAMPLES}/cif2cbf.c")
@@ -1215,12 +1233,14 @@ target_link_libraries(cif2cbf
 add_executable(cbf_template_t
   "${CBF__DECTRIS_EXAMPLES}/cbf_template_t.c")
 target_link_libraries(cbf_template_t
-  cbf)
+  cbf
+  "${libm}")
 
 add_executable(testcell
   "${CBF__EXAMPLES}/testcell.C")
 target_link_libraries(testcell
-  cbf)
+  cbf
+  "${libm}")
 
 add_executable(roi_peaksearch
   "${CBF__EXAMPLES}/dps_peaksearch.c"
@@ -1232,12 +1252,14 @@ target_link_libraries(roi_peaksearch
 add_executable(sauter_test
   "${CBF__EXAMPLES}/sauter_test.C")
 target_link_libraries(sauter_test
-  cbf)
+  cbf
+  "${libm}")
 
 add_executable(sequence_match
   "${CBF__EXAMPLES}/sequence_match.c")
 target_link_libraries(sequence_match
-  cbf)
+  cbf
+  "${libm}")
 
 add_executable(test_cbf_airy_disk
   "${CBF__EXAMPLES}/test_cbf_airy_disk.c")
@@ -1249,33 +1271,39 @@ if(CBF_ENABLE_ULP)
   add_executable(testulp
     "${CBF__EXAMPLES}/testulp.c")
   target_link_libraries(testulp
-    cbf)
+  cbf
+  "${libm}")
 endif()
 
 add_executable(testhdf5
   "${CBF__EXAMPLES}/testhdf5.c")
 target_link_libraries(testhdf5
-  cbf)
+  cbf
+  "${libm}")
 
 add_executable(testalloc
   "${CBF__EXAMPLES}/testalloc.c")
 target_link_libraries(testalloc
-  cbf)
+  cbf
+  "${libm}")
 
 add_executable(testflat
   "${CBF__EXAMPLES}/testflat.c")
 target_link_libraries(testflat
-  cbf)
+  cbf
+  "${libm}")
 
 add_executable(testflatpacked
   "${CBF__EXAMPLES}/testflatpacked.c")
 target_link_libraries(testflatpacked
-  cbf)
+  cbf
+  "${libm}")
 
 add_executable(testreals
   "${CBF__EXAMPLES}/testreals.c")
 target_link_libraries(testreals
-  cbf)
+  cbf
+  "${libm}")
 
 
 #
