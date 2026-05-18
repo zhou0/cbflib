@@ -304,7 +304,8 @@ if(CBF_ENABLE_FORTRAN)
   if(CMAKE_Fortran_COMPILER)
     enable_language(Fortran)
   else()
-    message(FATAL_ERROR "Fortran 90 support requested, but no compiler found")
+    message(WARNING "Fortran 90 support requested, but no compiler found. Disabling Fortran support.")
+    set(CBF_ENABLE_FORTRAN OFF CACHE BOOL "Enable Fortran 90" FORCE)
   endif()
 endif()
 
@@ -1022,22 +1023,35 @@ if(BUILD_SHARED_LIBS AND CBF_ENABLE_PYTHON)
   # As per Makefile, want links (not lynx) to reduce the diffs against
   # versioned CBFlib.txt.  Need SWIG 4.0.0 or later.  For Python 3,
   # Makefile also adds "# coding=utf-8" to the top of pycbf.py.
-  find_program(BROWSER_DUMP_TOOL NAMES links elinks lynx REQUIRED)
+  find_program(BROWSER_DUMP_TOOL NAMES links elinks lynx)
   find_package(Python COMPONENTS Development Interpreter REQUIRED)
   find_package(SWIG COMPONENTS python REQUIRED)
   include(UseSWIG)
 
-  add_custom_command(
-    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/pycbf/CBFlib.txt"
-    COMMAND ${CMAKE_COMMAND} -E make_directory
-      "${CMAKE_CURRENT_BINARY_DIR}/pycbf"
-    COMMAND ${CMAKE_COMMAND}
-      "-Dcommand=${BROWSER_DUMP_TOOL};-dump;CBFlib.html"
-      "-Doutput-file=${CMAKE_CURRENT_BINARY_DIR}/pycbf/CBFlib.txt"
-      -P "${CMAKE_CURRENT_SOURCE_DIR}/redirect.cmake"
-    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/doc/CBFlib.html"
-    VERBATIM
-    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/doc")
+  if(BROWSER_DUMP_TOOL)
+    add_custom_command(
+      OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/pycbf/CBFlib.txt"
+      COMMAND ${CMAKE_COMMAND} -E make_directory
+        "${CMAKE_CURRENT_BINARY_DIR}/pycbf"
+      COMMAND ${CMAKE_COMMAND}
+        "-Dcommand=${BROWSER_DUMP_TOOL};-dump;CBFlib.html"
+        "-Doutput-file=${CMAKE_CURRENT_BINARY_DIR}/pycbf/CBFlib.txt"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/redirect.cmake"
+      DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/doc/CBFlib.html"
+      VERBATIM
+      WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/doc")
+  else()
+    message(WARNING "Neither links, elinks, nor lynx found. Falling back to using pre-generated doc/CBFlib.txt.")
+    add_custom_command(
+      OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/pycbf/CBFlib.txt"
+      COMMAND ${CMAKE_COMMAND} -E make_directory
+        "${CMAKE_CURRENT_BINARY_DIR}/pycbf"
+      COMMAND ${CMAKE_COMMAND} -E copy
+        "${CMAKE_CURRENT_SOURCE_DIR}/doc/CBFlib.txt"
+        "${CMAKE_CURRENT_BINARY_DIR}/pycbf/CBFlib.txt"
+      DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/doc/CBFlib.txt"
+      VERBATIM)
+  endif()
 
 
   # Generate the SWIG interfaces from CBFlib.txt (so really no need to
