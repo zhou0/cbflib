@@ -305,6 +305,13 @@
 #include <math.h>
 #include <errno.h>
 #include "cbf_getopt.h"
+
+#define CVBUFSIZ 8192
+
+#ifdef __MINGW32__
+#define NOMKSTEMP
+#define NOTMPDIR
+#endif
 #ifdef HAVE_UNISTD_H
 #  include <unistd.h>
 #endif
@@ -527,6 +534,11 @@ int main (int argc, char *argv [])
   int errflg = 0;
   char * imgtmp=NULL;
   int imgtmpused = 0;
+#ifndef NOMKSTEMP
+  int imgtmpfd;
+#endif
+  int nbytes;
+  char buf[CVBUFSIZ];
   const char *imgin, *cbfout, *template, *distancestr, *alias;
   cbf_detector detector;
   char *tag, *data, *root;
@@ -670,12 +682,42 @@ int main (int argc, char *argv [])
 
   if (!imgin || strcmp(imgin?imgin:"","-") == 0) {
      imgtmp = (char *)malloc(strlen("/tmp/cvt_imgXXXXXX")+1);
+#ifdef NOTMPDIR
+     strcpy(imgtmp, "cvt_imgXXXXXX");
+#else
      strcpy(imgtmp, "/tmp/cvt_imgXXXXXX");
+#endif
+#ifdef NOMKSTEMP
      if ((imgin = mktemp(imgtmp)) == NULL ) {
-       fprintf(stderr,"\n convert_image: Can't create temporary file name %s.\n", imgtmp);
-       fprintf(stderr,"%s\n",strerror(errno));
+       fprintf(stderr, "\n convert_image: Can't create temporary file name %s.\n", imgtmp);
+       fprintf(stderr, "%s\n", strerror(errno));
        exit(1);
      }
+     if ( (in = fopen(imgtmp, "wb+")) == NULL) {
+       fprintf(stderr, "Can't open temporary file %s.\n", imgtmp);
+       fprintf(stderr, "%s\n", strerror(errno));
+       exit(1);
+     }
+#else
+     if ((imgtmpfd = mkstemp(imgtmp)) == -1 ) {
+       fprintf(stderr, "Can't create temporary file %s.\n", imgtmp);
+       fprintf(stderr, "%s\n", strerror(errno));
+       exit(1);
+     }
+     if ( (in = fdopen(imgtmpfd, "w+b")) == NULL) {
+       fprintf(stderr, "convert_image:  Can't open temporary file %s.\n", imgtmp);
+       fprintf(stderr, "%s\n", strerror(errno));
+       exit(1);
+     }
+#endif
+     while ((nbytes = fread(buf, 1, CVBUFSIZ, stdin))) {
+       if(nbytes != fwrite(buf, 1, nbytes, in)) {
+         fprintf(stderr, "convert_image:  Failed to write %s.\n", imgtmp);
+         exit(1);
+       }
+     }
+     fclose(in);
+     imgin = imgtmp;
      imgtmpused = 1;
   }
 
