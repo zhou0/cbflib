@@ -50,7 +50,7 @@ jobs:
     - name: Install Bison on Windows
       if: runner.os == 'Windows'
       run: |
-        winget install -e --id WinFlexBison.win_flex_bison
+        winget install -e --id WinFlexBison.win_flex_bison --accept-source-agreements --accept-package-agreements
         echo "C:\\Program Files\\WinFlexBison" >> $GITHUB_PATH
 
     - name: Set reusable strings
