@@ -712,34 +712,41 @@ endif()
 if(WIN32)
   find_package(BISON 2.7)
   if(NOT BISON_FOUND)
-    # Windows platforms older than Windows 10 might not have winget or easy bison access.
-    # Attempt to fetch win_flex_bison.
-    message(STATUS "Bison not found. Attempting to download win_flex_bison...")
-    set(WIN_FLEX_BISON_URL "https://github.com/lexxmark/winflexbison/releases/download/v2.4/win_flex_bison-2.4.zip")
-    set(WIN_FLEX_BISON_DIR "${CMAKE_BINARY_DIR}/win_flex_bison")
-    if(NOT EXISTS "${WIN_FLEX_BISON_DIR}")
-      file(DOWNLOAD "${WIN_FLEX_BISON_URL}" "${CMAKE_BINARY_DIR}/win_flex_bison.zip" SHOW_PROGRESS)
-      file(ARCHIVE_EXTRACT INPUT "${CMAKE_BINARY_DIR}/win_flex_bison.zip" DESTINATION "${WIN_FLEX_BISON_DIR}")
+    # On Windows platforms older than Windows 10, or if winget fails,
+    # attempt to fetch win_flex_bison.
+    set(SHOULD_DOWNLOAD_BISON TRUE)
+    if(CMAKE_SYSTEM_VERSION VERSION_GREATER_EQUAL "10.0")
+      # On Win10+ we expect winget to work, but if BISON is still not found, we download as fallback.
     endif()
-    set(BISON_EXECUTABLE "${WIN_FLEX_BISON_DIR}/win_bison.exe")
-    if(EXISTS "${BISON_EXECUTABLE}")
-      set(BISON_FOUND TRUE)
-      set(BISON_VERSION "2.7") # win_bison 2.4 matches bison 2.7+ features enough
-      # Manually define bison_target as FindBISON.cmake won't if it didn't find bison
-      if(NOT COMMAND bison_target)
-        macro(bison_target Name Yaml Output)
-          set(BISON_${Name}_OUTPUTS "${CMAKE_CURRENT_BINARY_DIR}/${Output}")
-          # ARGV3 should be DEFINES_FILE, ARGV4 the header filename
-          set(BISON_${Name}_DEFINES "${CMAKE_CURRENT_BINARY_DIR}/${ARGV4}")
-          add_custom_command(
-            OUTPUT "${BISON_${Name}_OUTPUTS}" "${BISON_${Name}_DEFINES}"
-            COMMAND "${BISON_EXECUTABLE}" --defines="${BISON_${Name}_DEFINES}" -o "${BISON_${Name}_OUTPUTS}" "${Yaml}"
-            DEPENDS "${Yaml}"
-            VERBATIM)
-        endmacro()
+
+    if(SHOULD_DOWNLOAD_BISON)
+      message(STATUS "Bison not found. Attempting to download win_flex_bison...")
+      set(WIN_FLEX_BISON_URL "https://github.com/lexxmark/winflexbison/releases/download/v2.4/win_flex_bison-2.4.zip")
+      set(WIN_FLEX_BISON_DIR "${CMAKE_BINARY_DIR}/win_flex_bison")
+      if(NOT EXISTS "${WIN_FLEX_BISON_DIR}")
+        file(DOWNLOAD "${WIN_FLEX_BISON_URL}" "${CMAKE_BINARY_DIR}/win_flex_bison.zip" SHOW_PROGRESS)
+        file(ARCHIVE_EXTRACT INPUT "${CMAKE_BINARY_DIR}/win_flex_bison.zip" DESTINATION "${WIN_FLEX_BISON_DIR}")
       endif()
-    else()
-      message(FATAL_ERROR "Bison 2.7 or later is required on Windows, and automatic download failed.")
+      set(BISON_EXECUTABLE "${WIN_FLEX_BISON_DIR}/win_bison.exe")
+      if(EXISTS "${BISON_EXECUTABLE}")
+        set(BISON_FOUND TRUE)
+        set(BISON_VERSION "2.7") # win_bison 2.4 matches bison 2.7+ features enough
+        # Manually define bison_target as FindBISON.cmake won't if it didn't find bison
+        if(NOT COMMAND bison_target)
+          macro(bison_target Name Yaml Output)
+            set(BISON_${Name}_OUTPUTS "${CMAKE_CURRENT_BINARY_DIR}/${Output}")
+            # ARGV3 should be DEFINES_FILE, ARGV4 the header filename
+            set(BISON_${Name}_DEFINES "${CMAKE_CURRENT_BINARY_DIR}/${ARGV4}")
+            add_custom_command(
+              OUTPUT "${BISON_${Name}_OUTPUTS}" "${BISON_${Name}_DEFINES}"
+              COMMAND "${BISON_EXECUTABLE}" --defines="${BISON_${Name}_DEFINES}" -o "${BISON_${Name}_OUTPUTS}" "${Yaml}"
+              DEPENDS "${Yaml}"
+              VERBATIM)
+          endmacro()
+        endif()
+      else()
+        message(FATAL_ERROR "Bison 2.7 or later is required on Windows, and automatic download failed.")
+      endif()
     endif()
   endif()
 else()
