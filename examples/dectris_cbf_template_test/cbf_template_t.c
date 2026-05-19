@@ -32,6 +32,11 @@
 #define MX_PARAMS_MAIN		/* turn on space allocations in mx_parms.h */
 
 
+
+#ifdef _WIN32
+#define strcasecmp _stricmp
+#define strncasecmp _strnicmp
+#endif
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>

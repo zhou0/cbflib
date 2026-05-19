@@ -481,6 +481,11 @@
  * Crystallography                                                    *
  **********************************************************************/
 
+
+#ifdef _WIN32
+#define strcasecmp _stricmp
+#define strncasecmp _strnicmp
+#endif
 #include "cbf.h"
 #include "cbf_simple.h"
 #include "img.h"
