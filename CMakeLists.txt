@@ -545,8 +545,13 @@ endif()
 # {LIBAEC,ZLIB}_TGZ_{NAME,ORIGPATH} values taken from
 # CMakePresets.json.  Set _h5dump_executable to the path to h5dump and
 # _hdf5_target to the real (unaliased) HDF5 target.
-set(CBF_WITH_HDF5 ON CACHE BOOL
-  "Link against internally built HDF5 library")
+if(WIN32)
+  set(CBF_WITH_HDF5 OFF CACHE BOOL
+    "Link against internally built HDF5 library")
+else()
+  set(CBF_WITH_HDF5 ON CACHE BOOL
+    "Link against internally built HDF5 library")
+endif()
 mark_as_advanced(CBF_WITH_HDF5)
 
 set(HDF5REGISTER "--register" "manual" CACHE INTERNAL
@@ -845,7 +850,7 @@ target_include_directories(cbf
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
 target_link_libraries(cbf
-  PUBLIC hdf5
+  PUBLIC ${_hdf5_target}
   PRIVATE pcre2-posix
   PRIVATE ${libm})
 
