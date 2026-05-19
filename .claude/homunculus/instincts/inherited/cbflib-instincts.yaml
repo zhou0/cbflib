@@ -1,0 +1,408 @@
+# Instincts generated from https://github.com/zhou0/cbflib
+# Generated: 2026-05-19T07:08:23.780Z
+# Version: 2.0
+# NOTE: This file supplements (does not replace) any existing curated instincts.
+# High-confidence manually curated instincts should be preserved alongside these.
+
+---
+id: cbflib-commit-length
+trigger: "when writing a commit message"
+confidence: 0.6
+domain: git
+source: repo-analysis
+source_repo: https://github.com/zhou0/cbflib
+---
+
+# Cbflib Commit Length
+
+## Action
+
+Write moderate-length commit messages (~65 characters)
+
+## Evidence
+
+- Average commit message length: 65 chars
+- Based on 4 commits
+
+---
+id: cbflib-naming-files
+trigger: "when creating a new file"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/zhou0/cbflib
+---
+
+# Cbflib Naming Files
+
+## Action
+
+Use snake_case naming convention
+
+## Evidence
+
+- Analyzed file naming patterns in repository
+- Dominant pattern: snake_case
+
+---
+id: cbflib-import-relative
+trigger: "when importing modules"
+confidence: 0.75
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/zhou0/cbflib
+---
+
+# Cbflib Import Relative
+
+## Action
+
+Use relative imports for project files
+
+## Evidence
+
+- Import analysis shows relative import pattern
+- Example: import { x } from '../lib/x'
+
+---
+id: cbflib-export-style
+trigger: "when exporting from a module"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/zhou0/cbflib
+---
+
+# Cbflib Export Style
+
+## Action
+
+Prefer named exports
+
+## Evidence
+
+- Export pattern analysis
+- Dominant style: named
+
+---
+id: cbflib-test-separate
+trigger: "when writing tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: https://github.com/zhou0/cbflib
+---
+
+# Cbflib Test Separate
+
+## Action
+
+Place tests in the tests/ or __tests__/ directory, mirroring src structure
+
+## Evidence
+
+- Separate test directory pattern detected
+- Tests live in dedicated test folders
+
+---
+id: cbflib-workflow-ci-build-failure-fix
+trigger: "when doing ci build failure fix"
+confidence: 0.6
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/zhou0/cbflib
+---
+
+# Cbflib Workflow Ci Build Failure Fix
+
+## Action
+
+Follow the ci-build-failure-fix workflow:
+1. Identify cause of CI build failure (e.g., deprecated function, missing library, optional toolchain component).
+2. Update source code to replace deprecated or problematic functions (e.g., mktemp → mkstemp in examples/convert_image.c).
+3. Modify CMakeLists.txt to adjust build options, add or remove dependencies, and make components optional as needed.
+4. Explicitly link required libraries (e.g., libm) in CMakeLists.txt to resolve linkage errors.
+5. Update CI workflow files (e.g., .github/workflows/cmake-multi-platform.yml) to ensure required tools are installed on all platforms.
+6. Remove obsolete or deprecated build artifacts (e.g., Makefile_old).
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~2x per month
+- Files: CMakeLists.txt, examples/convert_image.c, .github/workflows/cmake-multi-platform.yml
+
+---
+id: cbflib-instinct-file-naming
+trigger: "When creating a new file"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: zhou0/cbflib
+---
+
+# Cbflib Instinct File Naming
+
+## Action
+
+Name the file using snake_case
+
+## Evidence
+
+- Pattern in namingConventions.files
+- Observed in repository file names
+
+---
+id: cbflib-instinct-function-naming
+trigger: "When defining a new function"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: zhou0/cbflib
+---
+
+# Cbflib Instinct Function Naming
+
+## Action
+
+Name the function using camelCase
+
+## Evidence
+
+- Pattern in namingConventions.functions
+
+---
+id: cbflib-instinct-class-naming
+trigger: "When defining a new class"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: zhou0/cbflib
+---
+
+# Cbflib Instinct Class Naming
+
+## Action
+
+Name the class using PascalCase
+
+## Evidence
+
+- Pattern in namingConventions.classes
+
+---
+id: cbflib-instinct-constant-naming
+trigger: "When defining a constant"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: zhou0/cbflib
+---
+
+# Cbflib Instinct Constant Naming
+
+## Action
+
+Name the constant using SCREAMING_SNAKE_CASE
+
+## Evidence
+
+- Pattern in namingConventions.constants
+
+---
+id: cbflib-instinct-import-style
+trigger: "When importing modules"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: zhou0/cbflib
+---
+
+# Cbflib Instinct Import Style
+
+## Action
+
+Use relative import paths
+
+## Evidence
+
+- Pattern in importStyle
+
+---
+id: cbflib-instinct-export-style
+trigger: "When exporting modules or symbols"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: zhou0/cbflib
+---
+
+# Cbflib Instinct Export Style
+
+## Action
+
+Use named exports
+
+## Evidence
+
+- Pattern in exportStyle
+
+---
+id: cbflib-instinct-test-location
+trigger: "When adding new tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: zhou0/cbflib
+---
+
+# Cbflib Instinct Test Location
+
+## Action
+
+Place test files in a separate directory from source code
+
+## Evidence
+
+- Pattern in architecture.folderStructure.testLocation
+
+---
+id: cbflib-instinct-commit-format
+trigger: "When writing a commit message"
+confidence: 0.7
+domain: git
+source: repo-analysis
+source_repo: zhou0/cbflib
+---
+
+# Cbflib Instinct Commit Format
+
+## Action
+
+Use a concise, freeform message describing the main change (no enforced prefix)
+
+## Evidence
+
+- Commits have no prefixes
+- Average commit message length is 65 characters
+- Examples: 'Fix mktemp deprecation and resolve CI build failures'
+
+---
+id: cbflib-instinct-ci-build-failure-fix-identify
+trigger: "When CI build fails due to deprecations, missing dependencies, or platform-specific issues"
+confidence: 0.9
+domain: workflow
+source: repo-analysis
+source_repo: zhou0/cbflib
+---
+
+# Cbflib Instinct Ci Build Failure Fix Identify
+
+## Action
+
+Identify the specific cause of the CI build failure
+
+## Evidence
+
+- Step 1 in ci-build-failure-fix workflow
+- Seen in commit messages describing cause identification
+
+---
+id: cbflib-instinct-ci-build-failure-fix-replace-deprecated
+trigger: "When a deprecated or problematic function causes CI build failure"
+confidence: 0.9
+domain: workflow
+source: repo-analysis
+source_repo: zhou0/cbflib
+---
+
+# Cbflib Instinct Ci Build Failure Fix Replace Deprecated
+
+## Action
+
+Update source code to replace deprecated or problematic functions
+
+## Evidence
+
+- Step 2 in ci-build-failure-fix workflow
+- Commits replacing mktemp with mkstemp
+
+---
+id: cbflib-instinct-ci-build-failure-fix-cmake-modify
+trigger: "When build options or dependencies cause CI build failure"
+confidence: 0.9
+domain: workflow
+source: repo-analysis
+source_repo: zhou0/cbflib
+---
+
+# Cbflib Instinct Ci Build Failure Fix Cmake Modify
+
+## Action
+
+Modify CMakeLists.txt to adjust build options, add/remove dependencies, or make components optional
+
+## Evidence
+
+- Step 3 in ci-build-failure-fix workflow
+- Commits modifying CMakeLists.txt
+
+---
+id: cbflib-instinct-ci-build-failure-fix-link-libraries
+trigger: "When CI build fails due to missing library linkage"
+confidence: 0.9
+domain: workflow
+source: repo-analysis
+source_repo: zhou0/cbflib
+---
+
+# Cbflib Instinct Ci Build Failure Fix Link Libraries
+
+## Action
+
+Explicitly link required libraries in CMakeLists.txt
+
+## Evidence
+
+- Step 4 in ci-build-failure-fix workflow
+- Commits adding libm linkage
+
+---
+id: cbflib-instinct-ci-build-failure-fix-update-ci
+trigger: "When CI workflow is missing required tools or setup"
+confidence: 0.9
+domain: workflow
+source: repo-analysis
+source_repo: zhou0/cbflib
+---
+
+# Cbflib Instinct Ci Build Failure Fix Update Ci
+
+## Action
+
+Update CI workflow files to ensure required tools are installed on all platforms
+
+## Evidence
+
+- Step 5 in ci-build-failure-fix workflow
+- Commits updating .github/workflows/cmake-multi-platform.yml
+
+---
+id: cbflib-instinct-ci-build-failure-fix-remove-obsolete
+trigger: "When obsolete or deprecated build artifacts are present"
+confidence: 0.9
+domain: workflow
+source: repo-analysis
+source_repo: zhou0/cbflib
+---
+
+# Cbflib Instinct Ci Build Failure Fix Remove Obsolete
+
+## Action
+
+Remove obsolete or deprecated build artifacts
+
+## Evidence
+
+- Step 6 in ci-build-failure-fix workflow
+- Commits removing Makefile_old
+
