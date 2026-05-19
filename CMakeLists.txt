@@ -673,13 +673,17 @@ endif()
 #
 # Since Bison 2.7 (2012-12-12), use of "%define api.pure full" is
 # strongly encouraged.
-find_package(BISON 2.7 REQUIRED)
-bison_target(cbf_stx "${CBF__SRC}/cbf.stx.y" "cbf_stx.c"
-  DEFINES_FILE "cbf_stx.h")
+find_package(BISON 2.7)
+if(BISON_FOUND)
+  bison_target(cbf_stx "${CBF__SRC}/cbf.stx.y" "cbf_stx.c"
+    DEFINES_FILE "cbf_stx.h")
+else()
+  message(WARNING "Bison 2.7 or later not found. The build may fail if generated files are missing.")
+endif()
 
 set(
 	CBF_C_SOURCES
-    "${BISON_cbf_stx_OUTPUTS}"
+    "$<$<BOOL:${BISON_FOUND}>:${BISON_cbf_stx_OUTPUTS}>"
     ${CBF__SRC}/cbf.c
     "${CBF__SRC}/cbf_airy_disk.c"
     ${CBF__SRC}/cbf_alloc.c
