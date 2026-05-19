@@ -590,11 +590,24 @@ if(CBF_WITH_HDF5)
   endif()
 else()
   if(WIN32)
-    find_package(HDF5 REQUIRED COMPONENTS C HL)
+    find_package(HDF5 REQUIRED CONFIG)
     set(_h5dump_executable "h5dump")
-    set(_hdf5_target hdf5::hdf5)
     if(TARGET hdf5::hdf5-shared)
        set(_hdf5_target hdf5::hdf5-shared)
+    elif(TARGET hdf5::hdf5-static)
+       set(_hdf5_target hdf5::hdf5-static)
+    elif(TARGET hdf5-shared)
+       set(_hdf5_target hdf5-shared)
+    elif(TARGET hdf5-static)
+       set(_hdf5_target hdf5-static)
+    else()
+       set(_hdf5_target hdf5::hdf5)
+    endif()
+    # Check if HL library is separate
+    if(TARGET hdf5::hdf5_hl-shared)
+       list(APPEND _hdf5_target hdf5::hdf5_hl-shared)
+    elif(TARGET hdf5::hdf5_hl-static)
+       list(APPEND _hdf5_target hdf5::hdf5_hl-static)
     endif()
   else()
     find_package(PkgConfig REQUIRED)
@@ -617,12 +630,21 @@ endif()
 # CBFlib must be compiled with H5_USE_110_API.  With MSVC, also need
 # H5_BUILT_AS_DYNAMIC_LIB if HDF5 is a dynamic library.
 # target_compile_definitions cannot be used on an ALIAS target.
-add_library(hdf5 ALIAS ${_hdf5_target})
-target_compile_definitions(${_hdf5_target}
-  INTERFACE H5_USE_110_API)
-if(BUILD_SHARED_LIBS)
+if(WIN32 AND NOT CBF_WITH_HDF5)
+  add_library(hdf5 INTERFACE)
+  target_link_libraries(hdf5 INTERFACE ${_hdf5_target})
+  target_compile_definitions(hdf5 INTERFACE H5_USE_110_API)
+  if(BUILD_SHARED_LIBS)
+    target_compile_definitions(hdf5 INTERFACE H5_BUILT_AS_DYNAMIC_LIB)
+  endif()
+else()
+  add_library(hdf5 ALIAS ${_hdf5_target})
   target_compile_definitions(${_hdf5_target}
-    INTERFACE H5_BUILT_AS_DYNAMIC_LIB)
+    INTERFACE H5_USE_110_API)
+  if(BUILD_SHARED_LIBS)
+    target_compile_definitions(${_hdf5_target}
+      INTERFACE H5_BUILT_AS_DYNAMIC_LIB)
+  endif()
 endif()
 
 
@@ -859,7 +881,7 @@ target_include_directories(cbf
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
 target_link_libraries(cbf
-  PUBLIC ${_hdf5_target}
+  PUBLIC hdf5
   PRIVATE pcre2-posix
   PRIVATE ${libm})
 
