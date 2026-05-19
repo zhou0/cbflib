@@ -3984,18 +3984,18 @@ if (CBF_SUCCESS==found) {
 
 
     /* Some error codes for use by the parsing functions - definitions should not be visible */
-    extern const int cbf_configError_success = 0;
-    extern const int cbf_configError_unexpectedInput = 1;
-    extern const int cbf_configError_expectedDelimeter = 2;
-    extern const int cbf_configError_expectedNumber = 3;
-    extern const int cbf_configError_openingFile = 4;
-    extern const int cbf_configError_expectedString = 5;
-    extern const int cbf_configError_duplicateField = 6;
-    extern const int cbf_configError_unexpectedEOF = 7;
-    extern const int cbf_configError_undefinedValue = 8;
-    extern const int cbf_configError_invalidDependency = 9;
-    extern const int cbf_configError_missingDependency = 10;
-    extern const int cbf_configError_loop = 11;
+    CBF_API extern const int cbf_configError_success = 0;
+    CBF_API extern const int cbf_configError_unexpectedInput = 1;
+    CBF_API extern const int cbf_configError_expectedDelimeter = 2;
+    CBF_API extern const int cbf_configError_expectedNumber = 3;
+    CBF_API extern const int cbf_configError_openingFile = 4;
+    CBF_API extern const int cbf_configError_expectedString = 5;
+    CBF_API extern const int cbf_configError_duplicateField = 6;
+    CBF_API extern const int cbf_configError_unexpectedEOF = 7;
+    CBF_API extern const int cbf_configError_undefinedValue = 8;
+    CBF_API extern const int cbf_configError_invalidDependency = 9;
+    CBF_API extern const int cbf_configError_missingDependency = 10;
+    CBF_API extern const int cbf_configError_loop = 11;
 
     static int cbf_isblank (int c)
     {

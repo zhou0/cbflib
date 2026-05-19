@@ -904,6 +904,7 @@ set(
 # Note that HDF5 is a PUBLIC dependency of CBFlib, because cbf_hdf5.h
 # includes hdf5.h.
 add_library(cbf ${CBF_C_SOURCES})
+target_compile_definitions(cbf PRIVATE CBF_EXPORT)
 if(CBF_ENABLE_ULP)
   target_compile_definitions(cbf
     PUBLIC CBF_USE_ULP)

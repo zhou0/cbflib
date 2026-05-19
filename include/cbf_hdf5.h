@@ -837,7 +837,7 @@ cbf_H5Drequire_scalar_F64LE2(loc,ds,nm,val,cmp)
      config.h
      ****************************************************************/
     
-	extern const int cbf_configError_success;
+	CBF_API extern const int cbf_configError_success;
 
     /* Opaque type for a collection of configuration items */
     struct cbf_config_t;
