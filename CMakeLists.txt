@@ -914,7 +914,7 @@ if(NOT HAVE_REALPATH)
     PRIVATE "${CBF__SRC}/realpath.c")
 endif()
 
-set_target_properties(cbf PROPERTIES OUTPUT_NAME "cbf")
+set_target_properties(cbf PROPERTIES OUTPUT_NAME "cbf" WINDOWS_EXPORT_ALL_SYMBOLS ON)
 set_target_properties(cbf PROPERTIES LINKER_LANGUAGE C)
 set_target_properties(cbf PROPERTIES SOVERSION "${SOVERSION}")
 target_include_directories(cbf
