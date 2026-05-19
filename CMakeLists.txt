@@ -275,6 +275,7 @@
 
 # find_program()'s REQUIRED option was introduced in CMake 3.18.
 cmake_minimum_required(VERSION 3.18)
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 project(CBFlib
   LANGUAGES C CXX
   VERSION 0.9.8)
