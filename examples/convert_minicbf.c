@@ -321,7 +321,7 @@
 
 #define CVTBUFSIZ 8192
 
-#ifdef __MINGW32__
+#if defined(__MINGW32__) || defined(_MSC_VER)
 #define NOMKSTEMP
 #define NOTMPDIR
 #endif

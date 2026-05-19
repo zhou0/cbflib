@@ -505,7 +505,7 @@
 #define C2CBUFSIZ 8192
 #define NUMDICTS 50
 
-#ifdef __MINGW32__
+#if defined(__MINGW32__) || defined(_MSC_VER)
 #define NOMKSTEMP
 #define NOTMPDIR
 #endif
