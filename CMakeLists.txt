@@ -739,7 +739,7 @@ if(WIN32)
             set(BISON_${Name}_DEFINES "${CMAKE_CURRENT_BINARY_DIR}/${ARGV4}")
             add_custom_command(
               OUTPUT "${BISON_${Name}_OUTPUTS}" "${BISON_${Name}_DEFINES}"
-              COMMAND "${BISON_EXECUTABLE}" --defines="${BISON_${Name}_DEFINES}" -o "${BISON_${Name}_OUTPUTS}" "${Yaml}"
+              COMMAND "${BISON_EXECUTABLE}" -d -o "${BISON_${Name}_OUTPUTS}" "${Yaml}"
               DEPENDS "${Yaml}"
               VERBATIM)
           endmacro()
