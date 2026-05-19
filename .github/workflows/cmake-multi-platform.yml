@@ -47,6 +47,12 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Install Bison on Windows
+      if: runner.os == 'Windows'
+      run: |
+        winget install -e --id WinFlexBison.win_flex_bison
+        echo "C:\\Program Files\\WinFlexBison" >> $GITHUB_PATH
+
     - name: Set reusable strings
       # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
       id: strings
