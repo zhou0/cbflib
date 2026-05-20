@@ -56,6 +56,8 @@
 #include <string.h>
 #include <float.h>
 
+static volatile double vzero = 0.0;
+
 /*
  32-bit quiet NaN:
  0b s111 1111 11xx xxxx xxxx xxxx xxxx xxxx
@@ -238,8 +240,8 @@ testResult_t test_ulp32()
 	const float pzero = 0.0f;
 	const float nzero = -0.0f;
 	const float eps = FLT_EPSILON;
-	const float pinf = 1.0f/0.0f;
-	const float ninf = -1.0f/0.0f;
+	const float pinf = (float)(1.0/vzero);
+	const float ninf = (float)(-1.0/vzero);
 	const float pqnan = _pqnan_32(); /* +ve quiet nan */
 	const float nqnan = _nqnan_32(); /* -ve quiet nan */
 	const float psnan = _psnan_32(); /* +ve signalling nan */
@@ -599,8 +601,8 @@ testResult_t test_ulp64()
 	const double pzero = 0.0;
 	const double nzero = -0.0;
 	const double eps = DBL_EPSILON;
-	const double pinf = 1.0/0.0;
-	const double ninf = -1.0/0.0;
+	const double pinf = 1.0/vzero;
+	const double ninf = -1.0/vzero;
 	const double pqnan = _pqnan_64(); /* +ve quiet nan */
 	const double nqnan = _nqnan_64(); /* -ve quiet nan */
 	const double psnan = _psnan_64(); /* +ve signalling nan */
