@@ -10,6 +10,11 @@
 
 /******************* Begin testcbf.c ***********************/
 
+
+#ifdef _WIN32
+#define popen _popen
+#define pclose _pclose
+#endif
 #include <stdio.h>
 #include <cbf.h>
 #include <string.h>

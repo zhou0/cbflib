@@ -267,6 +267,8 @@ extern "C" {
 #include "cbf_stx.h"
 #include "cbf_ws.h"
 
+#define YYSTYPE union _cbf_stype
+
 #define yyparse       cbf_parse
 #define yylex         cbf_lex_wrapper
 #define yyerror(dummy,x)    cbf_syntax_error(((cbf_handle)(((void **)context)[2])),(x))
@@ -332,8 +334,9 @@ static int cbf_syntax_error (cbf_handle handle, const char *message)
 %defines
 %lex-param {void * context}
 %parse-param {void * context}
-%define api.pure full
-%define api.value.type {union _cbf_stype}
+%pure-parser
+/* %define api.pure full */
+/* %define api.value.type {union _cbf_stype} */
 %token-table
 
 %token <text> DATA

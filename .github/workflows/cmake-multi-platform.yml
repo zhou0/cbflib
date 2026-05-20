@@ -47,12 +47,28 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Install Bison on Windows
+      if: runner.os == 'Windows'
+      run: |
+        winget install -e --id WinFlexBison.win_flex_bison --accept-source-agreements --accept-package-agreements
+        echo "C:\\Program Files\\WinFlexBison" >> $GITHUB_PATH
+
+
+    - name: Install HDF5 on Windows
+      if: runner.os == 'Windows'
+      run: vcpkg install hdf5:x64-windows vcpkg-gfortran readline:x64-windows
+
     - name: Set reusable strings
       # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
       id: strings
       shell: bash
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+
+    - name: Set VCPKG Toolchain
+      if: runner.os == 'Windows'
+      shell: bash
+      run: echo "VCPKG_TOOLCHAIN=-DCMAKE_TOOLCHAIN_FILE=${VCPKG_INSTALLATION_ROOT}/scripts/buildsystems/vcpkg.cmake" >> $GITHUB_ENV
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
@@ -63,6 +79,7 @@ jobs:
         -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
         -S ${{ github.workspace }}
+        ${{ env.VCPKG_TOOLCHAIN }}
 
     - name: Build
       # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).

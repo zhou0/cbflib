@@ -268,11 +268,9 @@ extern "C" {
 #ifdef _WIN32
   #include <direct.h>
   #define MKDIR(x) _mkdir(x)
-  #ifdef H5_HAVE_MINGW
-    #include<errno.h>
-    #include <sys/stat.h>
-    #include <sys/types.h>
-  #endif
+  #include <errno.h>
+  #include <sys/stat.h>
+  #include <sys/types.h>
 #else
   #include <errno.h>
   #include <sys/stat.h>

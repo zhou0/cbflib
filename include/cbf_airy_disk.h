@@ -261,10 +261,11 @@ extern "C" {
 
 #include <stdio.h>
 #include <math.h>
+#include "cbf.h"
     
 #ifndef CBF_AIRY_DISK_C
-    extern const double cbf_airy_unit_disk_partvol_1D[20];
-    extern const double cbf_airy_unit_disk_partvol_2D[20][20];
+    extern CBF_API const double cbf_airy_unit_disk_partvol_1D[20];
+    extern CBF_API const double cbf_airy_unit_disk_partvol_2D[20][20];
 #endif
 
 #define CBF_AIRY_UNIT_DISK_FWHM 0.8434376803

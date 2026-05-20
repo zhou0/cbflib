@@ -275,6 +275,7 @@
 
 # find_program()'s REQUIRED option was introduced in CMake 3.18.
 cmake_minimum_required(VERSION 3.18)
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 project(CBFlib
   LANGUAGES C CXX
   VERSION 0.9.8)
@@ -304,7 +305,10 @@ if(CBF_ENABLE_FORTRAN)
   if(CMAKE_Fortran_COMPILER)
     enable_language(Fortran)
   else()
-    message(FATAL_ERROR "Fortran 90 support requested, but no compiler found")
+    if(NOT WIN32)
+      message(WARNING "Fortran 90 support requested, but no compiler found. Disabling Fortran support.")
+    endif()
+    set(CBF_ENABLE_FORTRAN OFF CACHE BOOL "Enable Fortran 90" FORCE)
   endif()
 endif()
 
@@ -544,8 +548,13 @@ endif()
 # {LIBAEC,ZLIB}_TGZ_{NAME,ORIGPATH} values taken from
 # CMakePresets.json.  Set _h5dump_executable to the path to h5dump and
 # _hdf5_target to the real (unaliased) HDF5 target.
-set(CBF_WITH_HDF5 ON CACHE BOOL
-  "Link against internally built HDF5 library")
+if(WIN32)
+  set(CBF_WITH_HDF5 OFF CACHE BOOL
+    "Link against internally built HDF5 library")
+else()
+  set(CBF_WITH_HDF5 ON CACHE BOOL
+    "Link against internally built HDF5 library")
+endif()
 mark_as_advanced(CBF_WITH_HDF5)
 
 set(HDF5REGISTER "--register" "manual" CACHE INTERNAL
@@ -583,10 +592,32 @@ if(CBF_WITH_HDF5)
     set(_hdf5_target hdf5-static)
   endif()
 else()
-  find_package(PkgConfig REQUIRED)
-  pkg_check_modules(hdf5 REQUIRED IMPORTED_TARGET hdf5>=1.10)
-  find_program(_h5dump_executable h5dump REQUIRED)
-  set(_hdf5_target PkgConfig::hdf5)
+  if(WIN32)
+    find_package(HDF5 REQUIRED CONFIG)
+    set(_h5dump_executable "h5dump")
+    if(TARGET hdf5::hdf5-shared)
+       set(_hdf5_target hdf5::hdf5-shared)
+    elseif(TARGET hdf5::hdf5-static)
+       set(_hdf5_target hdf5::hdf5-static)
+    elseif(TARGET hdf5-shared)
+       set(_hdf5_target hdf5-shared)
+    elseif(TARGET hdf5-static)
+       set(_hdf5_target hdf5-static)
+    else()
+       set(_hdf5_target hdf5::hdf5)
+    endif()
+    # Check if HL library is separate
+    if(TARGET hdf5::hdf5_hl-shared)
+       list(APPEND _hdf5_target hdf5::hdf5_hl-shared)
+    elseif(TARGET hdf5::hdf5_hl-static)
+       list(APPEND _hdf5_target hdf5::hdf5_hl-static)
+    endif()
+  else()
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(hdf5 REQUIRED IMPORTED_TARGET hdf5>=1.10)
+    find_program(_h5dump_executable h5dump REQUIRED)
+    set(_hdf5_target PkgConfig::hdf5)
+  endif()
 endif()
 
 
@@ -602,12 +633,21 @@ endif()
 # CBFlib must be compiled with H5_USE_110_API.  With MSVC, also need
 # H5_BUILT_AS_DYNAMIC_LIB if HDF5 is a dynamic library.
 # target_compile_definitions cannot be used on an ALIAS target.
-add_library(hdf5 ALIAS ${_hdf5_target})
-target_compile_definitions(${_hdf5_target}
-  INTERFACE H5_USE_110_API)
-if(BUILD_SHARED_LIBS)
+if(WIN32 AND NOT CBF_WITH_HDF5)
+  add_library(hdf5 INTERFACE)
+  target_link_libraries(hdf5 INTERFACE ${_hdf5_target})
+  target_compile_definitions(hdf5 INTERFACE H5_USE_110_API)
+  if(BUILD_SHARED_LIBS)
+    target_compile_definitions(hdf5 INTERFACE H5_BUILT_AS_DYNAMIC_LIB)
+  endif()
+else()
+  add_library(hdf5 ALIAS ${_hdf5_target})
   target_compile_definitions(${_hdf5_target}
-    INTERFACE H5_BUILT_AS_DYNAMIC_LIB)
+    INTERFACE H5_USE_110_API)
+  if(BUILD_SHARED_LIBS)
+    target_compile_definitions(${_hdf5_target}
+      INTERFACE H5_BUILT_AS_DYNAMIC_LIB)
+  endif()
 endif()
 
 
@@ -672,13 +712,59 @@ endif()
 #
 # Since Bison 2.7 (2012-12-12), use of "%define api.pure full" is
 # strongly encouraged.
-find_package(BISON 2.7 REQUIRED)
-bison_target(cbf_stx "${CBF__SRC}/cbf.stx.y" "cbf_stx.c"
-  DEFINES_FILE "cbf_stx.h")
+if(WIN32)
+  find_package(BISON 2.7)
+  if(NOT BISON_FOUND)
+    # On Windows platforms older than Windows 10, or if winget fails,
+    # attempt to fetch win_flex_bison.
+    set(SHOULD_DOWNLOAD_BISON TRUE)
+    if(CMAKE_SYSTEM_VERSION VERSION_GREATER_EQUAL "10.0")
+      # On Win10+ we expect winget to work, but if BISON is still not found, we download as fallback.
+    endif()
+
+    if(SHOULD_DOWNLOAD_BISON)
+      message(STATUS "Bison not found. Attempting to download win_flex_bison...")
+      set(WIN_FLEX_BISON_URL "https://github.com/lexxmark/winflexbison/releases/download/v2.4/win_flex_bison-2.4.zip")
+      set(WIN_FLEX_BISON_DIR "${CMAKE_BINARY_DIR}/win_flex_bison")
+      if(NOT EXISTS "${WIN_FLEX_BISON_DIR}")
+        file(DOWNLOAD "${WIN_FLEX_BISON_URL}" "${CMAKE_BINARY_DIR}/win_flex_bison.zip" SHOW_PROGRESS)
+        file(ARCHIVE_EXTRACT INPUT "${CMAKE_BINARY_DIR}/win_flex_bison.zip" DESTINATION "${WIN_FLEX_BISON_DIR}")
+      endif()
+      set(BISON_EXECUTABLE "${WIN_FLEX_BISON_DIR}/win_bison.exe")
+      if(EXISTS "${BISON_EXECUTABLE}")
+        set(BISON_FOUND TRUE)
+        set(BISON_VERSION "2.7") # win_bison 2.4 matches bison 2.7+ features enough
+        # Manually define bison_target as FindBISON.cmake won't if it didn't find bison
+        if(NOT COMMAND bison_target)
+          macro(bison_target Name Yaml Output)
+            set(BISON_${Name}_OUTPUTS "${CMAKE_CURRENT_BINARY_DIR}/${Output}")
+            # ARGV3 should be DEFINES_FILE, ARGV4 the header filename
+            set(BISON_${Name}_DEFINES "${CMAKE_CURRENT_BINARY_DIR}/${ARGV4}")
+            add_custom_command(
+              OUTPUT "${BISON_${Name}_OUTPUTS}" "${BISON_${Name}_DEFINES}"
+              COMMAND "${BISON_EXECUTABLE}" -d -o "${BISON_${Name}_OUTPUTS}" "${Yaml}"
+              DEPENDS "${Yaml}"
+              VERBATIM)
+          endmacro()
+        endif()
+      else()
+        message(FATAL_ERROR "Bison 2.7 or later is required on Windows, and automatic download failed.")
+      endif()
+    endif()
+  endif()
+else()
+  find_package(BISON 2.7)
+endif()
+if(BISON_FOUND)
+  bison_target(cbf_stx "${CBF__SRC}/cbf.stx.y" "cbf_stx.c"
+    DEFINES_FILE "cbf_stx.h")
+elseif(NOT WIN32)
+  message(WARNING "Bison 2.7 or later not found. The build may fail if generated files are missing.")
+endif()
 
 set(
 	CBF_C_SOURCES
-    "${BISON_cbf_stx_OUTPUTS}"
+    "$<$<BOOL:${BISON_FOUND}>:${BISON_cbf_stx_OUTPUTS}>"
     ${CBF__SRC}/cbf.c
     "${CBF__SRC}/cbf_airy_disk.c"
     ${CBF__SRC}/cbf_alloc.c
@@ -820,6 +906,7 @@ set(
 # Note that HDF5 is a PUBLIC dependency of CBFlib, because cbf_hdf5.h
 # includes hdf5.h.
 add_library(cbf ${CBF_C_SOURCES})
+target_compile_definitions(cbf PRIVATE CBF_EXPORT)
 if(CBF_ENABLE_ULP)
   target_compile_definitions(cbf
     PUBLIC CBF_USE_ULP)
@@ -831,7 +918,7 @@ if(NOT HAVE_REALPATH)
     PRIVATE "${CBF__SRC}/realpath.c")
 endif()
 
-set_target_properties(cbf PROPERTIES OUTPUT_NAME "cbf")
+set_target_properties(cbf PROPERTIES OUTPUT_NAME "cbf" WINDOWS_EXPORT_ALL_SYMBOLS ON)
 set_target_properties(cbf PROPERTIES LINKER_LANGUAGE C)
 set_target_properties(cbf PROPERTIES SOVERSION "${SOVERSION}")
 target_include_directories(cbf
@@ -915,12 +1002,14 @@ if(CBF_ENABLE_FORTRAN)
   add_executable(test_fcb_read_image
     "${CMAKE_CURRENT_BINARY_DIR}/src/test_fcb_read_image.f90")
   target_link_libraries(test_fcb_read_image
-    fcb)
+    fcb
+    "${libm}")
 
   add_executable(test_xds_binary
     "${CMAKE_CURRENT_BINARY_DIR}/src/test_xds_binary.f90")
   target_link_libraries(test_xds_binary
-    fcb)
+    fcb
+    "${libm}")
 
 
   # Use the pre-generated SWIG wrapper, because current SWIG does not
@@ -929,7 +1018,8 @@ if(CBF_ENABLE_FORTRAN)
     "${CMAKE_CURRENT_SOURCE_DIR}/f90cbf/f90cbf.f90"
     "${CMAKE_CURRENT_SOURCE_DIR}/f90cbf/f90cbf_wrap.c")
   target_link_libraries(f90cbf
-    cbf)
+    cbf
+    "${libm}")
 endif()
 
 
@@ -973,7 +1063,8 @@ if(BUILD_SHARED_LIBS AND CBF_ENABLE_JAVA)
     PRIVATE "${JAVA_INCLUDE_PATH}"
             "${JAVA_INCLUDE_PATH2}")
   target_link_libraries(cbf_wrap
-    PRIVATE cbf)
+    PRIVATE cbf
+    "${libm}")
 
   set(_java_files_generated
     "${CMAKE_CURRENT_BINARY_DIR}/jcbf/CBF_NODETYPE.java"
@@ -1008,7 +1099,9 @@ if(BUILD_SHARED_LIBS AND CBF_ENABLE_JAVA)
   add_executable(ctestcbf
     "${CBF__EXAMPLES}/testcbf.c")
   target_link_libraries(ctestcbf
-    cbf)
+    cbf
+    "${libm}"
+    $<$<PLATFORM_ID:Windows>:ws2_32>)
 
   add_jar(testcbf
     "${CBF__EXAMPLES}/testcbf.java"
@@ -1022,22 +1115,35 @@ if(BUILD_SHARED_LIBS AND CBF_ENABLE_PYTHON)
   # As per Makefile, want links (not lynx) to reduce the diffs against
   # versioned CBFlib.txt.  Need SWIG 4.0.0 or later.  For Python 3,
   # Makefile also adds "# coding=utf-8" to the top of pycbf.py.
-  find_program(BROWSER_DUMP_TOOL NAMES links elinks lynx REQUIRED)
+  find_program(BROWSER_DUMP_TOOL NAMES links elinks lynx)
   find_package(Python COMPONENTS Development Interpreter REQUIRED)
   find_package(SWIG COMPONENTS python REQUIRED)
   include(UseSWIG)
 
-  add_custom_command(
-    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/pycbf/CBFlib.txt"
-    COMMAND ${CMAKE_COMMAND} -E make_directory
-      "${CMAKE_CURRENT_BINARY_DIR}/pycbf"
-    COMMAND ${CMAKE_COMMAND}
-      "-Dcommand=${BROWSER_DUMP_TOOL};-dump;CBFlib.html"
-      "-Doutput-file=${CMAKE_CURRENT_BINARY_DIR}/pycbf/CBFlib.txt"
-      -P "${CMAKE_CURRENT_SOURCE_DIR}/redirect.cmake"
-    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/doc/CBFlib.html"
-    VERBATIM
-    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/doc")
+  if(BROWSER_DUMP_TOOL)
+    add_custom_command(
+      OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/pycbf/CBFlib.txt"
+      COMMAND ${CMAKE_COMMAND} -E make_directory
+        "${CMAKE_CURRENT_BINARY_DIR}/pycbf"
+      COMMAND ${CMAKE_COMMAND}
+        "-Dcommand=${BROWSER_DUMP_TOOL};-dump;CBFlib.html"
+        "-Doutput-file=${CMAKE_CURRENT_BINARY_DIR}/pycbf/CBFlib.txt"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/redirect.cmake"
+      DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/doc/CBFlib.html"
+      VERBATIM
+      WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/doc")
+  else()
+    message(WARNING "Neither links, elinks, nor lynx found. Falling back to using pre-generated doc/CBFlib.txt.")
+    add_custom_command(
+      OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/pycbf/CBFlib.txt"
+      COMMAND ${CMAKE_COMMAND} -E make_directory
+        "${CMAKE_CURRENT_BINARY_DIR}/pycbf"
+      COMMAND ${CMAKE_COMMAND} -E copy
+        "${CMAKE_CURRENT_SOURCE_DIR}/doc/CBFlib.txt"
+        "${CMAKE_CURRENT_BINARY_DIR}/pycbf/CBFlib.txt"
+      DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/doc/CBFlib.txt"
+      VERBATIM)
+  endif()
 
 
   # Generate the SWIG interfaces from CBFlib.txt (so really no need to
@@ -1110,23 +1216,27 @@ add_executable(tiff2cbf
   "${CBF__EXAMPLES}/tiff2cbf.c")
 target_link_libraries(tiff2cbf
   cbf
-  tiff)
+  tiff
+  "${libm}")
 
 add_executable(cbf2nexus
   "${CBF__EXAMPLES}/cbf2nexus.c")
 target_link_libraries(cbf2nexus
-  cbf)
+  cbf
+  "${libm}")
 
 add_executable(nexus2cbf
   "${CBF__EXAMPLES}/nexus2cbf.c")
 target_link_libraries(nexus2cbf
   cbf
-  hdf5)
+  hdf5
+  "${libm}")
 
 add_executable(minicbf2nexus
   "${CBF__EXAMPLES}/minicbf2nexus.c")
 target_link_libraries(minicbf2nexus
-  cbf)
+  cbf
+  "${libm}")
 
 add_executable(adscimg2cbf
   "${CBF__EXAMPLES}/adscimg2cbf.c"
@@ -1144,21 +1254,27 @@ target_link_libraries(cbf2adscimg
 
 add_executable(convert_f90_swig_wrap
   "${CBF__EXAMPLES}/convert_f90_swig_wrap.cpp")
+target_link_libraries(convert_f90_swig_wrap
+  cbf
+  "${libm}")
 
 add_executable(convert_image
   "${CBF__EXAMPLES}/convert_image.c")
 target_link_libraries(convert_image
-  cbf)
+  cbf
+  "${libm}")
 
 add_executable(convert_minicbf
   "${CBF__EXAMPLES}/convert_minicbf.c")
 target_link_libraries(convert_minicbf
-  cbf)
+  cbf
+  "${libm}")
 
 add_executable(makecbf
   "${CBF__EXAMPLES}/makecbf.c")
 target_link_libraries(makecbf
-  cbf)
+  cbf
+  "${libm}")
 
 add_executable(cbf_standardize_numbers
   "${CBF__EXAMPLES}/cbf_standardize_numbers.c")
@@ -1173,7 +1289,8 @@ endif()
 add_executable(cbf_tail
   "${CBF__EXAMPLES}/cbf_tail.c")
 target_link_libraries(cbf_tail
-  cbf)
+  cbf
+  "${libm}")
 
 add_executable(cbf_testxfelread
   "${CBF__EXAMPLES}/cbf_testxfelread.c")
@@ -1184,12 +1301,14 @@ target_link_libraries(cbf_testxfelread
 add_executable(changtestcompression
   "${CBF__EXAMPLES}/changtestcompression.c")
 target_link_libraries(changtestcompression
-  cbf)
+  cbf
+  "${libm}")
 
 add_executable(img2cif
   "${CBF__EXAMPLES}/img2cif.c")
 target_link_libraries(img2cif
-  cbf)
+  cbf
+  "${libm}")
 
 add_executable(cif2cbf
   "${CBF__EXAMPLES}/cif2cbf.c")
@@ -1201,12 +1320,14 @@ target_link_libraries(cif2cbf
 add_executable(cbf_template_t
   "${CBF__DECTRIS_EXAMPLES}/cbf_template_t.c")
 target_link_libraries(cbf_template_t
-  cbf)
+  cbf
+  "${libm}")
 
 add_executable(testcell
   "${CBF__EXAMPLES}/testcell.C")
 target_link_libraries(testcell
-  cbf)
+  cbf
+  "${libm}")
 
 add_executable(roi_peaksearch
   "${CBF__EXAMPLES}/dps_peaksearch.c"
@@ -1218,12 +1339,14 @@ target_link_libraries(roi_peaksearch
 add_executable(sauter_test
   "${CBF__EXAMPLES}/sauter_test.C")
 target_link_libraries(sauter_test
-  cbf)
+  cbf
+  "${libm}")
 
 add_executable(sequence_match
   "${CBF__EXAMPLES}/sequence_match.c")
 target_link_libraries(sequence_match
-  cbf)
+  cbf
+  "${libm}")
 
 add_executable(test_cbf_airy_disk
   "${CBF__EXAMPLES}/test_cbf_airy_disk.c")
@@ -1235,33 +1358,39 @@ if(CBF_ENABLE_ULP)
   add_executable(testulp
     "${CBF__EXAMPLES}/testulp.c")
   target_link_libraries(testulp
-    cbf)
+  cbf
+  "${libm}")
 endif()
 
 add_executable(testhdf5
   "${CBF__EXAMPLES}/testhdf5.c")
 target_link_libraries(testhdf5
-  cbf)
+  cbf
+  "${libm}")
 
 add_executable(testalloc
   "${CBF__EXAMPLES}/testalloc.c")
 target_link_libraries(testalloc
-  cbf)
+  cbf
+  "${libm}")
 
 add_executable(testflat
   "${CBF__EXAMPLES}/testflat.c")
 target_link_libraries(testflat
-  cbf)
+  cbf
+  "${libm}")
 
 add_executable(testflatpacked
   "${CBF__EXAMPLES}/testflatpacked.c")
 target_link_libraries(testflatpacked
-  cbf)
+  cbf
+  "${libm}")
 
 add_executable(testreals
   "${CBF__EXAMPLES}/testreals.c")
 target_link_libraries(testreals
-  cbf)
+  cbf
+  "${libm}")
 
 
 #

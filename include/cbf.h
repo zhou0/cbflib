@@ -249,6 +249,16 @@
 
 #ifndef CBF_H
 #define CBF_H
+#if defined(_WIN32)
+#  ifdef CBF_EXPORT
+#    define CBF_API __declspec(dllexport)
+#  else
+#    define CBF_API __declspec(dllimport)
+#  endif
+#else
+#  define CBF_API
+#endif
+
 
 #include "hdf5.h"
 
@@ -322,7 +332,7 @@ _CBF_STR(CBF_VERS_RELEASE) CBF_VERS_SUBRELEASE
 #endif
    
 #if defined(CBF_DONT_USE_LONG_LONG) || defined(__cplusplus) || defined(__MINGW32__)
-#undef ULLONG_MAX
+/* #undef ULLONG_MAX */
 #undef CBF_USE_LONG_LONG
 #endif
 
