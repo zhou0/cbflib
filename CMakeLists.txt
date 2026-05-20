@@ -1098,7 +1098,8 @@ if(BUILD_SHARED_LIBS AND CBF_ENABLE_JAVA)
     "${CBF__EXAMPLES}/testcbf.c")
   target_link_libraries(ctestcbf
     cbf
-    "${libm}")
+    "${libm}"
+    $<$<PLATFORM_ID:Windows>:ws2_32>)
 
   add_jar(testcbf
     "${CBF__EXAMPLES}/testcbf.java"
