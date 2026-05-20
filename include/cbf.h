@@ -249,6 +249,16 @@
 
 #ifndef CBF_H
 #define CBF_H
+#if defined(_WIN32)
+#  ifdef CBF_EXPORT
+#    define CBF_API __declspec(dllexport)
+#  else
+#    define CBF_API __declspec(dllimport)
+#  endif
+#else
+#  define CBF_API
+#endif
+
 
 #include "hdf5.h"
 
