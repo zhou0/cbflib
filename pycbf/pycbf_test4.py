@@ -1,9 +1,9 @@
+from sys import argv
 def to_str(s):
     if isinstance(s, bytes): return s.decode()
     if isinstance(s, (list, tuple)): return type(s)(to_str(x) for x in s)
     return s
 
-from sys import argv
 
 # version of pycbf_test1 with write logic added
 import pycbf
