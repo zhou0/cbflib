@@ -1,3 +1,14 @@
+
+import builtins
+def to_str(s):
+    if isinstance(s, bytes):
+        try: return s.decode("utf-8")
+        except: return s.decode("latin-1")
+    if isinstance(s, (list, tuple)): return type(s)(to_str(x) for x in s)
+    return s
+def print(*args, **kwargs):
+    builtins.print(*(to_str(a) for a in args), **kwargs)
+
 # cbf_autoscrolled_window.py
 # utilities to create windows with a both a vertical
 # scroll bar and a horizontal scroll bar with each scroll bar

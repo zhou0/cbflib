@@ -1,9 +1,15 @@
-from sys import argv
+
+import builtins
 def to_str(s):
-    if isinstance(s, bytes): return s.decode()
+    if isinstance(s, bytes):
+        try: return s.decode("utf-8")
+        except: return s.decode("latin-1")
     if isinstance(s, (list, tuple)): return type(s)(to_str(x) for x in s)
     return s
+def print(*args, **kwargs):
+    builtins.print(*(to_str(a) for a in args), **kwargs)
 
+from sys import argv
 
 import pycbf
 object = pycbf.cbf_handle_struct() # FIXME
@@ -12,13 +18,13 @@ object.rewind_datablock()
 with open(argv[2],'w',newline='\n') as f:
     print("Found",object.count_datablocks(),"blocks",file=f)
     object.select_datablock(0)
-    print("Zeroth is named",to_str(object.datablock_name()),file=f)
+    print("Zeroth is named",object.datablock_name(),file=f)
     object.rewind_category()
     categories = object.count_categories()
     for i in range(categories):
         print("Category:",i, end=' ', file=f)
         object.select_category(i)
-        category_name = to_str(object.category_name())
+        category_name = object.category_name()
         print("Name:",category_name, end=' ', file=f)
         rows=object.count_rows()
         print("Rows:",rows, end=' ', file=f)
@@ -27,7 +33,7 @@ with open(argv[2],'w',newline='\n') as f:
         loop=1
         object.rewind_column()
         while loop==1:
-            column_name = to_str(object.column_name())
+            column_name = object.column_name()
             print("column name \"",column_name,"\"", end=' ', file=f)
             try:
                object.next_column()
@@ -39,12 +45,12 @@ with open(argv[2],'w',newline='\n') as f:
             if j==0: print(file=f)
             print("row:",j,file=f)
             for k in range(cols):
-                name=to_str(object.column_name())
+                name=object.column_name()
                 print("col:",name, end=' ', file=f)
                 object.select_column(k)
-                typeofvalue=to_str(object.get_typeofvalue())
+                typeofvalue=object.get_typeofvalue()
                 print("type:",typeofvalue,file=f)
-                if typeofvalue.find("bnry") > -1:
+                if typeofvalue.find(b"bnry") > -1:
                     s=object.get_integerarray_as_string()
                     print(len(s), file=f)
                     try:
@@ -61,7 +67,7 @@ with open(argv[2],'w',newline='\n') as f:
                     except ImportError:
                        print("You need to get numpy and matplotlib to see the data", file=f)
                 else:
-                    value=to_str(object.get_value())
+                    value=object.get_value()
                     print("Val:",value,i,file=f)
         print(file=f)
     del(object)
