@@ -297,6 +297,8 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
 
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
+set(BUILD_SHARED_LIBS ON CACHE BOOL "Build using shared libraries" FORCE)
+set(BUILD_STATIC_LIBS OFF CACHE BOOL "Build static libraries" FORCE)
 
 option(CBF_ENABLE_FORTRAN "Enable Fortran 90" ON)
 if(CBF_ENABLE_FORTRAN)
