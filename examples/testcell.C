@@ -185,8 +185,8 @@
 
 
 
-using namespace std;
 #include <iostream>
+using namespace std;
 #include "cbf.h"
 #include "cbf_simple.h"
 
