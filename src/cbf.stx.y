@@ -334,7 +334,7 @@ static int cbf_syntax_error (cbf_handle handle, const char *message)
 %defines
 %lex-param {void * context}
 %parse-param {void * context}
-%pure-parser
+%define api.pure
 /* %define api.pure full */
 /* %define api.value.type {union _cbf_stype} */
 %token-table
