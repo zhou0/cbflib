@@ -37,7 +37,7 @@ void usage ( void ) {
 int main (int argc, char ** argv) {
     
     FILE *file;
-    char format[10];
+    char format[20];
     size_t lineln, ii;
     char * line;
     int c;
