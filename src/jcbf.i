@@ -76,6 +76,7 @@ int cbf_get_realarray(cbf_handle  handle,
                           size_t     *nelem_read);
 
 /* Parse the header file to generate wrappers */
+%immutable cbf_node_struct::name;
 %include "cbf_tree.h"
 
 %include "typemaps.i"
