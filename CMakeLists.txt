@@ -374,70 +374,13 @@ endif()
 #
 # Macros
 #
-
-#
-#  CBF_DEBUG_MESSAGE if CBF_CMAKE_DEBUG issue str
 #
 #
-# CBF_AUTO_INSTALL_DEPENDENCY -- attempt to install a dependency if not found
 #
-macro(CBF_AUTO_INSTALL_DEPENDENCY FIND_NAME VCPKG_NAME PORT_NAME APT_NAME)
-  set(_FOUND FALSE)
-  find_package(${FIND_NAME} QUIET)
-  if(${FIND_NAME}_FOUND OR ${FIND_NAME}_Found OR ${${FIND_NAME}_FOUND})
-    set(_FOUND TRUE)
-  endif()
-
-  if(NOT _FOUND)
-    # Fallback to pkg-config if available
-    find_package(PkgConfig QUIET)
-    if(PKG_CONFIG_FOUND)
-      pkg_check_modules(CBF_AUTO_${FIND_NAME} QUIET ${FIND_NAME})
-      if(CBF_AUTO_${FIND_NAME}_FOUND)
-        set(_FOUND TRUE)
-      endif()
-    endif()
-  endif()
-
-  if(NOT _FOUND)
-    message(STATUS "Dependency ${FIND_NAME} not found. Attempting to install...")
-    if(WIN32)
-      execute_process(COMMAND vcpkg install ${VCPKG_NAME}
-        RESULT_VARIABLE _install_res)
-    elseif(APPLE)
-      execute_process(COMMAND sudo port install ${PORT_NAME}
-        RESULT_VARIABLE _install_res)
-    elseif(UNIX AND NOT APPLE)
-      execute_process(COMMAND sudo apt-get update
-        RESULT_VARIABLE _update_res)
-      execute_process(COMMAND sudo apt-get install -y ${APT_NAME}
-        RESULT_VARIABLE _install_res)
-    endif()
-
-    if(_install_res EQUAL 0)
-      message(STATUS "Successfully installed ${FIND_NAME}. Retrying find_package...")
-      find_package(${FIND_NAME} QUIET)
-    else()
-      message(WARNING "Failed to install ${FIND_NAME}.")
-    endif()
-  endif()
-endmacro()
-
 #
-# Auto-install dependencies
 #
-CBF_AUTO_INSTALL_DEPENDENCY(BZip2 bzip2 bzip2 libbz2-dev)
-CBF_AUTO_INSTALL_DEPENDENCY(libdeflate libdeflate libdeflate libdeflate-dev)
-CBF_AUTO_INSTALL_DEPENDENCY(JPEG libjpeg-turbo libjpeg-turbo libjpeg-turbo8-dev)
-CBF_AUTO_INSTALL_DEPENDENCY(JBIG jbigkit jbigkit libjbig-dev)
-CBF_AUTO_INSTALL_DEPENDENCY(LERC lerc lerc liblerc-dev)
-CBF_AUTO_INSTALL_DEPENDENCY(LibLZMA liblzma xz liblzma-dev)
-CBF_AUTO_INSTALL_DEPENDENCY(zstd zstd zstd libzstd-dev)
-CBF_AUTO_INSTALL_DEPENDENCY(WebP libwebp webp libwebp-dev)
-CBF_AUTO_INSTALL_DEPENDENCY(GLUT freeglut freeglut freeglut3-dev)
-CBF_AUTO_INSTALL_DEPENDENCY(Editline libedit libedit libedit-dev)
-CBF_AUTO_INSTALL_DEPENDENCY(PCRE2 pcre2 pcre2 libpcre2-dev)
-CBF_AUTO_INSTALL_DEPENDENCY(HDF5 hdf5 hdf5 libhdf5-dev)
+# Macros
+#
 
 macro(CBF_DEBUG_MESSAGE str)
   if(CBF_CMAKE_DEBUG)
@@ -445,9 +388,6 @@ macro(CBF_DEBUG_MESSAGE str)
   endif(CBF_CMAKE_DEBUG)
 endmacro (CBF_DEBUG_MESSAGE)
 
-#
-# CBF_REQUIRE_DIRECTORY -- require directory dir
-#
 macro(CBF_REQUIRE_DIRECTORY dir)
   if (NOT EXISTS "${dir}")
     file(MAKE_DIRECTORY "${dir}")
@@ -455,13 +395,92 @@ macro(CBF_REQUIRE_DIRECTORY dir)
   endif (NOT EXISTS "${dir}")
 endmacro(CBF_REQUIRE_DIRECTORY)
 
-#
-# Directories
-#
+macro(CBF_AUTO_INSTALL_DEPENDENCY FIND_NAME VCPKG_NAME PORT_NAME APT_NAME CONDITION)
+  if(${CONDITION})
+    set(_FOUND FALSE)
+    if("${FIND_NAME}" STREQUAL "BISON")
+      find_package(${FIND_NAME} 2.7 QUIET)
+    elseif("${FIND_NAME}" STREQUAL "zstd" AND WIN32)
+      find_package(zstd CONFIG QUIET)
+    else()
+      find_package(${FIND_NAME} QUIET)
+    endif()
+    if(${FIND_NAME}_FOUND OR ${FIND_NAME}_Found OR ${${FIND_NAME}_FOUND})
+      set(_FOUND TRUE)
+    endif()
+    if("${FIND_NAME}" STREQUAL "zstd" AND (TARGET zstd::libzstd_shared OR TARGET zstd::libzstd_static))
+      set(_FOUND TRUE)
+    endif()
+    if(NOT _FOUND)
+      find_package(PkgConfig QUIET)
+      if(PKG_CONFIG_FOUND)
+        pkg_check_modules(CBF_AUTO_${FIND_NAME} QUIET ${FIND_NAME})
+        if(CBF_AUTO_${FIND_NAME}_FOUND)
+          set(_FOUND TRUE)
+        endif()
+      endif()
+    endif()
+    if(NOT _FOUND)
+      message(STATUS "Dependency ${FIND_NAME} not found. Attempting to install...")
+      set(_install_res 1)
+      if(WIN32)
+        if(NOT "${VCPKG_NAME}" STREQUAL "SKIP")
+          execute_process(COMMAND vcpkg install ${VCPKG_NAME} RESULT_VARIABLE _install_res)
+        endif()
+      elseif(APPLE)
+        if(NOT "${PORT_NAME}" STREQUAL "SKIP")
+          execute_process(COMMAND sudo port install ${PORT_NAME} RESULT_VARIABLE _install_res)
+        endif()
+      elseif(UNIX AND NOT APPLE)
+        if(NOT "${APT_NAME}" STREQUAL "SKIP")
+          execute_process(COMMAND sudo apt-get install -y ${APT_NAME} RESULT_VARIABLE _install_res)
+        endif()
+      endif()
+      if(_install_res EQUAL 0)
+        message(STATUS "Successfully installed ${FIND_NAME}. Retrying find_package...")
+        if("${FIND_NAME}" STREQUAL "BISON")
+          find_package(${FIND_NAME} 2.7 QUIET)
+        # Fixed the elif to elseif here!
+        elseif("${FIND_NAME}" STREQUAL "zstd" AND WIN32)
+          find_package(zstd CONFIG QUIET)
+        else()
+          find_package(${FIND_NAME} QUIET)
+        endif()
+        # Re-check found status
+        if(${FIND_NAME}_FOUND OR ${FIND_NAME}_Found OR ${${FIND_NAME}_FOUND})
+          set(_FOUND TRUE)
+        endif()
+        if(NOT _FOUND AND PKG_CONFIG_FOUND)
+           pkg_check_modules(CBF_AUTO_${FIND_NAME} QUIET ${FIND_NAME})
+        endif()
+      else()
+        if(NOT _FOUND)
+          message(WARNING "Failed to install ${FIND_NAME} (or installation skipped).")
+        endif()
+      endif()
+    endif()
+  endif()
+endmacro()
 
-#
-# Directories on the kit side
-#
+set(NOT_CBF_WITH_LIBTIFF NOT CBF_WITH_LIBTIFF)
+set(NOT_CBF_WITH_PCRE2 NOT CBF_WITH_PCRE2)
+set(NOT_CBF_WITH_HDF5 NOT CBF_WITH_HDF5)
+
+CBF_AUTO_INSTALL_DEPENDENCY(BZip2 bzip2 bzip2 libbz2-dev NOT_CBF_WITH_LIBTIFF)
+CBF_AUTO_INSTALL_DEPENDENCY(libdeflate libdeflate libdeflate libdeflate-dev NOT_CBF_WITH_LIBTIFF)
+CBF_AUTO_INSTALL_DEPENDENCY(JPEG libjpeg-turbo libjpeg-turbo libjpeg-turbo8-dev NOT_CBF_WITH_LIBTIFF)
+CBF_AUTO_INSTALL_DEPENDENCY(JBIG jbigkit jbigkit libjbig-dev NOT_CBF_WITH_LIBTIFF)
+CBF_AUTO_INSTALL_DEPENDENCY(LERC lerc lerc liblerc-dev NOT_CBF_WITH_LIBTIFF)
+CBF_AUTO_INSTALL_DEPENDENCY(LibLZMA liblzma xz liblzma-dev NOT_CBF_WITH_LIBTIFF)
+CBF_AUTO_INSTALL_DEPENDENCY(zstd zstd zstd libzstd-dev NOT_CBF_WITH_LIBTIFF)
+CBF_AUTO_INSTALL_DEPENDENCY(WebP libwebp webp libwebp-dev NOT_CBF_WITH_LIBTIFF)
+CBF_AUTO_INSTALL_DEPENDENCY(GLUT freeglut freeglut freeglut3-dev TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(Editline SKIP libedit libedit-dev TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(PCRE2 pcre2 pcre2 libpcre2-dev NOT_CBF_WITH_PCRE2)
+CBF_AUTO_INSTALL_DEPENDENCY(HDF5 hdf5 hdf5 libhdf5-dev NOT_CBF_WITH_HDF5)
+CBF_AUTO_INSTALL_DEPENDENCY(BISON bison bison bison TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(SWIG swig swig swig TRUE)
+
 set(CBF__SRC       "${CBFlib_SOURCE_DIR}/src" )
 set(CBF__INCLUDE   "${CBFlib_SOURCE_DIR}/include" )
 set(CBF__DOC       "${CBFlib_SOURCE_DIR}/doc" )
