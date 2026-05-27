@@ -2680,7 +2680,9 @@ Returns an error code on failure or 0 for success. SEE ALSO
 %cstring_output_allocate_size(char ** s, int *slen, free(*$1))
        get_integerarray_as_string;
 %{
+#ifndef SWIG_PYTHON_STRICT_BYTE_CHAR
 #define SWIG_PYTHON_STRICT_BYTE_CHAR
+#endif
 %}
 // Get the length correct
 
@@ -2760,7 +2762,9 @@ Returns an error code on failure or 0 for success. SEE ALSO
 
 // Ensure we free the local temporary
 %{
+#ifndef SWIG_PYTHON_STRICT_BYTE_CHAR
 #define SWIG_PYTHON_STRICT_BYTE_CHAR
+#endif
 %}
 %cstring_output_allocate_size(char ** s, int *slen, free(*$1))
        get_realarray_as_string;
@@ -4803,7 +4807,9 @@ ndimslow and ndimmid should be the
 
 // Ensure we free the local temporary
 %{
+#ifndef SWIG_PYTHON_STRICT_BYTE_CHAR
 #define SWIG_PYTHON_STRICT_BYTE_CHAR
+#endif
 %}
 %cstring_output_allocate_size(char ** s, int *slen, free(*$1))
        get_image_as_string;
@@ -4865,7 +4871,9 @@ ndimslow and ndimmid should be the
 
 // Ensure we free the local temporary
 %{
+#ifndef SWIG_PYTHON_STRICT_BYTE_CHAR
 #define SWIG_PYTHON_STRICT_BYTE_CHAR
+#endif
 %}
 %cstring_output_allocate_size(char ** s, int *slen, free(*$1))
        get_image_fs_as_string;
@@ -4927,7 +4935,9 @@ ndimslow and ndimmid should be the
 
 // Ensure we free the local temporary
 %{
+#ifndef SWIG_PYTHON_STRICT_BYTE_CHAR
 #define SWIG_PYTHON_STRICT_BYTE_CHAR
+#endif
 %}
 %cstring_output_allocate_size(char ** s, int *slen, free(*$1))
        get_image_fs_as_string;
@@ -4989,7 +4999,9 @@ ndimslow and ndimmid should be the
 
 // Ensure we free the local temporary
 %{
+#ifndef SWIG_PYTHON_STRICT_BYTE_CHAR
 #define SWIG_PYTHON_STRICT_BYTE_CHAR
+#endif
 %}
 %cstring_output_allocate_size(char ** s, int *slen, free(*$1))
        get_real_image_as_string;
@@ -5052,7 +5064,9 @@ ndimslow and ndimmid should be the
 
 // Ensure we free the local temporary
 %{
+#ifndef SWIG_PYTHON_STRICT_BYTE_CHAR
 #define SWIG_PYTHON_STRICT_BYTE_CHAR
+#endif
 %}
 %cstring_output_allocate_size(char ** s, int *slen, free(*$1))
        get_real_image_fs_as_string;
@@ -5115,7 +5129,9 @@ ndimslow and ndimmid should be the
 
 // Ensure we free the local temporary
 %{
+#ifndef SWIG_PYTHON_STRICT_BYTE_CHAR
 #define SWIG_PYTHON_STRICT_BYTE_CHAR
+#endif
 %}
 %cstring_output_allocate_size(char ** s, int *slen, free(*$1))
        get_real_image_sf_as_string;
@@ -5179,7 +5195,9 @@ ndimslow and ndimmid should be the
 
 // Ensure we free the local temporary
 %{
+#ifndef SWIG_PYTHON_STRICT_BYTE_CHAR
 #define SWIG_PYTHON_STRICT_BYTE_CHAR
+#endif
 %}
 %cstring_output_allocate_size(char ** s, int *slen, free(*$1))
        get_3d_image_as_string;
@@ -5243,7 +5261,9 @@ ndimslow and ndimmid should be the
 
 // Ensure we free the local temporary
 %{
+#ifndef SWIG_PYTHON_STRICT_BYTE_CHAR
 #define SWIG_PYTHON_STRICT_BYTE_CHAR
+#endif
 %}
 %cstring_output_allocate_size(char ** s, int *slen, free(*$1))
        get_3d_image_fs_as_string;
@@ -5309,7 +5329,9 @@ ndimslow and ndimmid should be the
 %cstring_output_allocate_size(char ** s, int *slen, free(*$1))
        get_3d_image_sf_as_string;
 %{
+#ifndef SWIG_PYTHON_STRICT_BYTE_CHAR
 #define SWIG_PYTHON_STRICT_BYTE_CHAR
+#endif
 %}
 
 // Get the length correct
@@ -5373,7 +5395,9 @@ ndimslow and ndimmid should be the
 %cstring_output_allocate_size(char ** s, int *slen, free(*$1))
        get_real_3d_image_as_string;
 %{
+#ifndef SWIG_PYTHON_STRICT_BYTE_CHAR
 #define SWIG_PYTHON_STRICT_BYTE_CHAR
+#endif
 %}
 
 // Get the length correct
@@ -5435,7 +5459,9 @@ ndimslow and ndimmid should be the
 
 // Ensure we free the local temporary
 %{
+#ifndef SWIG_PYTHON_STRICT_BYTE_CHAR
 #define SWIG_PYTHON_STRICT_BYTE_CHAR
+#endif
 %}
 %cstring_output_allocate_size(char ** s, int *slen, free(*$1))
        get_real_3d_image_fs_as_string;
@@ -5498,7 +5524,9 @@ ndimslow and ndimmid should be the
 
 // Ensure we free the local temporary
 %{
+#ifndef SWIG_PYTHON_STRICT_BYTE_CHAR
 #define SWIG_PYTHON_STRICT_BYTE_CHAR
+#endif
 %}
 %cstring_output_allocate_size(char ** s, int *slen, free(*$1))
        get_real_3d_image_sf_as_string;

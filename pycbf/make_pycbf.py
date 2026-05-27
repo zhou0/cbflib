@@ -483,7 +483,9 @@ cbfhandle_specials = {
 %cstring_output_allocate_size(char ** s, int *slen, free(*$1))
        get_integerarray_as_string;
 %{
+#ifndef SWIG_PYTHON_STRICT_BYTE_CHAR
 #define SWIG_PYTHON_STRICT_BYTE_CHAR
+#endif
 %}
 // Get the length correct
 
@@ -515,7 +517,9 @@ cbfhandle_specials = {
 "cbf_get_image":["""
 // Ensure we free the local temporary
 %{
+#ifndef SWIG_PYTHON_STRICT_BYTE_CHAR
 #define SWIG_PYTHON_STRICT_BYTE_CHAR
+#endif
 %}
 %cstring_output_allocate_size(char ** s, int *slen, free(*$1))
        get_image_as_string;
@@ -544,7 +548,9 @@ cbfhandle_specials = {
 "cbf_get_image_fs":["""
 // Ensure we free the local temporary
 %{
+#ifndef SWIG_PYTHON_STRICT_BYTE_CHAR
 #define SWIG_PYTHON_STRICT_BYTE_CHAR
+#endif
 %}
 %cstring_output_allocate_size(char ** s, int *slen, free(*$1))
        get_image_fs_as_string;
@@ -573,7 +579,9 @@ cbfhandle_specials = {
 "cbf_get_image_sf":["""
 // Ensure we free the local temporary
 %{
+#ifndef SWIG_PYTHON_STRICT_BYTE_CHAR
 #define SWIG_PYTHON_STRICT_BYTE_CHAR
+#endif
 %}
 %cstring_output_allocate_size(char ** s, int *slen, free(*$1))
        get_image_fs_as_string;
@@ -602,7 +610,9 @@ cbfhandle_specials = {
 "cbf_get_real_image":["""
 // Ensure we free the local temporary
 %{
+#ifndef SWIG_PYTHON_STRICT_BYTE_CHAR
 #define SWIG_PYTHON_STRICT_BYTE_CHAR
+#endif
 %}
 %cstring_output_allocate_size(char ** s, int *slen, free(*$1))
        get_real_image_as_string;
@@ -631,7 +641,9 @@ cbfhandle_specials = {
 "cbf_get_real_image_fs":["""
 // Ensure we free the local temporary
 %{
+#ifndef SWIG_PYTHON_STRICT_BYTE_CHAR
 #define SWIG_PYTHON_STRICT_BYTE_CHAR
+#endif
 %}
 %cstring_output_allocate_size(char ** s, int *slen, free(*$1))
        get_real_image_fs_as_string;
@@ -660,7 +672,9 @@ cbfhandle_specials = {
 "cbf_get_real_image_sf":["""
 // Ensure we free the local temporary
 %{
+#ifndef SWIG_PYTHON_STRICT_BYTE_CHAR
 #define SWIG_PYTHON_STRICT_BYTE_CHAR
+#endif
 %}
 %cstring_output_allocate_size(char ** s, int *slen, free(*$1))
        get_real_image_sf_as_string;
@@ -689,7 +703,9 @@ cbfhandle_specials = {
 "cbf_get_3d_image":["""
 // Ensure we free the local temporary
 %{
+#ifndef SWIG_PYTHON_STRICT_BYTE_CHAR
 #define SWIG_PYTHON_STRICT_BYTE_CHAR
+#endif
 %}
 %cstring_output_allocate_size(char ** s, int *slen, free(*$1))
        get_3d_image_as_string;
@@ -718,7 +734,9 @@ cbfhandle_specials = {
 "cbf_get_3d_image_fs":["""
 // Ensure we free the local temporary
 %{
+#ifndef SWIG_PYTHON_STRICT_BYTE_CHAR
 #define SWIG_PYTHON_STRICT_BYTE_CHAR
+#endif
 %}
 %cstring_output_allocate_size(char ** s, int *slen, free(*$1))
        get_3d_image_fs_as_string;
@@ -749,7 +767,9 @@ cbfhandle_specials = {
 %cstring_output_allocate_size(char ** s, int *slen, free(*$1))
        get_3d_image_sf_as_string;
 %{
+#ifndef SWIG_PYTHON_STRICT_BYTE_CHAR
 #define SWIG_PYTHON_STRICT_BYTE_CHAR
+#endif
 %}
 
 // Get the length correct
@@ -779,7 +799,9 @@ cbfhandle_specials = {
 %cstring_output_allocate_size(char ** s, int *slen, free(*$1))
        get_real_3d_image_as_string;
 %{
+#ifndef SWIG_PYTHON_STRICT_BYTE_CHAR
 #define SWIG_PYTHON_STRICT_BYTE_CHAR
+#endif
 %}
 
 // Get the length correct
@@ -807,7 +829,9 @@ cbfhandle_specials = {
 "cbf_get_real_3d_image_fs":["""
 // Ensure we free the local temporary
 %{
+#ifndef SWIG_PYTHON_STRICT_BYTE_CHAR
 #define SWIG_PYTHON_STRICT_BYTE_CHAR
+#endif
 %}
 %cstring_output_allocate_size(char ** s, int *slen, free(*$1))
        get_real_3d_image_fs_as_string;
@@ -835,7 +859,9 @@ cbfhandle_specials = {
 "cbf_get_real_3d_image_sf":["""
 // Ensure we free the local temporary
 %{
+#ifndef SWIG_PYTHON_STRICT_BYTE_CHAR
 #define SWIG_PYTHON_STRICT_BYTE_CHAR
+#endif
 %}
 %cstring_output_allocate_size(char ** s, int *slen, free(*$1))
        get_real_3d_image_sf_as_string;
@@ -865,7 +891,9 @@ cbfhandle_specials = {
 "cbf_get_realarray":["""
 // Ensure we free the local temporary
 %{
+#ifndef SWIG_PYTHON_STRICT_BYTE_CHAR
 #define SWIG_PYTHON_STRICT_BYTE_CHAR
+#endif
 %}
 %cstring_output_allocate_size(char ** s, int *slen, free(*$1))
        get_realarray_as_string;
