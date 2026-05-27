@@ -119,7 +119,7 @@ static size_t createtestimage(void **data, int type, int nelem)
     uldata = (unsigned long *)calloc(nelem, sizeof(long));
     elsize = sizeof(long);
     while (i < nelem) {
-      uldata[i] = urand() * ULONG_MAX;
+      uldata[i] = (unsigned long)(urand() * (double)ULONG_MAX);
       i += 1 + urand() * NSTEPS;
     }
     *data = uldata;
@@ -128,7 +128,7 @@ static size_t createtestimage(void **data, int type, int nelem)
     sldata = (signed long *)calloc(nelem, sizeof(long));
     elsize = sizeof(long);
     while (i < nelem) {
-      sldata[i] = urand() * LONG_MAX;
+      sldata[i] = (signed long)(urand() * (double)LONG_MAX);
       i += 1 + urand() * NSTEPS;
     }
     *data = sldata;
@@ -138,7 +138,7 @@ static size_t createtestimage(void **data, int type, int nelem)
     ulldata = (unsigned long long *)calloc(nelem, sizeof(long long));
     elsize = sizeof(long long);
     while (i < nelem) {
-      ulldata[i] = urand() * ULLONG_MAX;
+      ulldata[i] = (unsigned long long)(urand() * (double)ULLONG_MAX);
       i += 1 + urand() * NSTEPS;
     }
     *data = ulldata;
@@ -147,7 +147,7 @@ static size_t createtestimage(void **data, int type, int nelem)
     slldata = (signed long long *)calloc(nelem, sizeof(long long));
     elsize = sizeof(long long);
     while (i < nelem) {
-      slldata[i] = urand() * LLONG_MAX;
+      slldata[i] = (signed long long)(urand() * (double)LLONG_MAX);
       i += 1 + urand() * NSTEPS;
     }
     *data = slldata;
