@@ -374,19 +374,17 @@ endif()
 #
 # Macros
 #
+#
+#
+# Macros
+#
 
-#
-#  CBF_DEBUG_MESSAGE if CBF_CMAKE_DEBUG issue str
-#
 macro(CBF_DEBUG_MESSAGE str)
   if(CBF_CMAKE_DEBUG)
     message(STATUS ${str})
   endif(CBF_CMAKE_DEBUG)
 endmacro (CBF_DEBUG_MESSAGE)
 
-#
-# CBF_REQUIRE_DIRECTORY -- require directory dir
-#
 macro(CBF_REQUIRE_DIRECTORY dir)
   if (NOT EXISTS "${dir}")
     file(MAKE_DIRECTORY "${dir}")
@@ -394,13 +392,77 @@ macro(CBF_REQUIRE_DIRECTORY dir)
   endif (NOT EXISTS "${dir}")
 endmacro(CBF_REQUIRE_DIRECTORY)
 
-#
-# Directories
-#
+macro(CBF_AUTO_INSTALL_DEPENDENCY FIND_NAME VCPKG_NAME PORT_NAME APT_NAME CONDITION)
+  if(${CONDITION})
+    set(_FOUND FALSE)
+    if("${FIND_NAME}" STREQUAL "zstd" AND WIN32)
+      # On Windows, check for zstd.h to avoid target pollution that conflicts with LibTIFF
+      find_path(ZSTD_CHECK_INCLUDE NAMES zstd.h QUIET)
+      if(ZSTD_CHECK_INCLUDE)
+        set(_FOUND TRUE)
+      endif()
+    else()
+      find_package(${FIND_NAME} QUIET)
+      if(${FIND_NAME}_FOUND OR ${FIND_NAME}_Found OR ${${FIND_NAME}_FOUND})
+        set(_FOUND TRUE)
+      endif()
+    endif()
 
-#
-# Directories on the kit side
-#
+    if(NOT _FOUND)
+      find_package(PkgConfig QUIET)
+      if(PKG_CONFIG_FOUND)
+        pkg_check_modules(CBF_AUTO_${FIND_NAME} QUIET ${FIND_NAME})
+        if(CBF_AUTO_${FIND_NAME}_FOUND)
+          set(_FOUND TRUE)
+        endif()
+      endif()
+    endif()
+
+    if(NOT _FOUND)
+      message(STATUS "Dependency ${FIND_NAME} not found. Attempting to install...")
+      set(_install_res 1)
+      if(WIN32)
+        if(NOT "${VCPKG_NAME}" STREQUAL "SKIP")
+          execute_process(COMMAND vcpkg install ${VCPKG_NAME} RESULT_VARIABLE _install_res)
+        endif()
+      elseif(APPLE)
+        if(NOT "${PORT_NAME}" STREQUAL "SKIP")
+          execute_process(COMMAND sudo port install ${PORT_NAME} RESULT_VARIABLE _install_res)
+        endif()
+      elseif(UNIX AND NOT APPLE)
+        if(NOT "${APT_NAME}" STREQUAL "SKIP")
+          execute_process(COMMAND sudo apt-get install -y ${APT_NAME} RESULT_VARIABLE _install_res)
+        endif()
+      endif()
+      if(_install_res EQUAL 0)
+        message(STATUS "Successfully installed ${FIND_NAME}. Retrying find_package...")
+        find_package(${FIND_NAME} QUIET)
+      else()
+        if(NOT _FOUND)
+          message(WARNING "Failed to install ${FIND_NAME} (or installation skipped).")
+        endif()
+      endif()
+    endif()
+  endif()
+endmacro()
+
+set(NOT_CBF_WITH_LIBTIFF NOT CBF_WITH_LIBTIFF)
+set(NOT_CBF_WITH_PCRE2 NOT CBF_WITH_PCRE2)
+set(NOT_CBF_WITH_HDF5 NOT CBF_WITH_HDF5)
+
+CBF_AUTO_INSTALL_DEPENDENCY(BZip2 bzip2 bzip2 libbz2-dev NOT_CBF_WITH_LIBTIFF)
+CBF_AUTO_INSTALL_DEPENDENCY(libdeflate libdeflate libdeflate libdeflate-dev NOT_CBF_WITH_LIBTIFF)
+CBF_AUTO_INSTALL_DEPENDENCY(JPEG libjpeg-turbo libjpeg-turbo libjpeg-turbo8-dev NOT_CBF_WITH_LIBTIFF)
+CBF_AUTO_INSTALL_DEPENDENCY(JBIG jbigkit jbigkit libjbig-dev NOT_CBF_WITH_LIBTIFF)
+CBF_AUTO_INSTALL_DEPENDENCY(LERC lerc lerc liblerc-dev NOT_CBF_WITH_LIBTIFF)
+CBF_AUTO_INSTALL_DEPENDENCY(LibLZMA liblzma xz liblzma-dev NOT_CBF_WITH_LIBTIFF)
+CBF_AUTO_INSTALL_DEPENDENCY(zstd zstd zstd libzstd-dev NOT_CBF_WITH_LIBTIFF)
+CBF_AUTO_INSTALL_DEPENDENCY(WebP libwebp webp libwebp-dev NOT_CBF_WITH_LIBTIFF)
+CBF_AUTO_INSTALL_DEPENDENCY(GLUT freeglut freeglut freeglut3-dev TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(Editline SKIP libedit libedit-dev TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(PCRE2 pcre2 pcre2 libpcre2-dev NOT_CBF_WITH_PCRE2)
+CBF_AUTO_INSTALL_DEPENDENCY(HDF5 hdf5 hdf5 libhdf5-dev NOT_CBF_WITH_HDF5)
+
 set(CBF__SRC       "${CBFlib_SOURCE_DIR}/src" )
 set(CBF__INCLUDE   "${CBFlib_SOURCE_DIR}/include" )
 set(CBF__DOC       "${CBFlib_SOURCE_DIR}/doc" )
@@ -486,7 +548,8 @@ fetchcontent_declare(pcre2
 
 fetchcontent_declare(tiff
   URL "https://download.osgeo.org/libtiff/tiff-4.7.0.tar.gz"
-  URL_HASH MD5=3a0fa4a270a4a192b08913f88d0cfbdd)
+  URL_HASH MD5=3a0fa4a270a4a192b08913f88d0cfbdd
+  PATCH_COMMAND "${PATCH}" -p1 -i "${CMAKE_CURRENT_SOURCE_DIR}/patches/tiff-zstd-conflict.patch")
 
 
 #
@@ -714,48 +777,50 @@ endif()
 #
 # Since Bison 2.7 (2012-12-12), use of "%define api.pure full" is
 # strongly encouraged.
-if(WIN32)
-  find_package(BISON 2.7)
-  if(NOT BISON_FOUND)
-    # On Windows platforms older than Windows 10, or if winget fails,
-    # attempt to fetch win_flex_bison.
-    set(SHOULD_DOWNLOAD_BISON TRUE)
-    if(CMAKE_SYSTEM_VERSION VERSION_GREATER_EQUAL "10.0")
-      # On Win10+ we expect winget to work, but if BISON is still not found, we download as fallback.
-    endif()
+if(NOT BISON_FOUND)
+  if(WIN32)
+    find_package(BISON 2.7)
+    if(NOT BISON_FOUND)
+      # On Windows platforms older than Windows 10, or if winget fails,
+      # attempt to fetch win_flex_bison.
+      set(SHOULD_DOWNLOAD_BISON TRUE)
+      if(CMAKE_SYSTEM_VERSION VERSION_GREATER_EQUAL "10.0")
+        # On Win10+ we expect winget to work, but if BISON is still not found, we download as fallback.
+      endif()
 
-    if(SHOULD_DOWNLOAD_BISON)
-      message(STATUS "Bison not found. Attempting to download win_flex_bison...")
-      set(WIN_FLEX_BISON_URL "https://github.com/lexxmark/winflexbison/releases/download/v2.4/win_flex_bison-2.4.zip")
-      set(WIN_FLEX_BISON_DIR "${CMAKE_BINARY_DIR}/win_flex_bison")
-      if(NOT EXISTS "${WIN_FLEX_BISON_DIR}")
-        file(DOWNLOAD "${WIN_FLEX_BISON_URL}" "${CMAKE_BINARY_DIR}/win_flex_bison.zip" SHOW_PROGRESS)
-        file(ARCHIVE_EXTRACT INPUT "${CMAKE_BINARY_DIR}/win_flex_bison.zip" DESTINATION "${WIN_FLEX_BISON_DIR}")
-      endif()
-      set(BISON_EXECUTABLE "${WIN_FLEX_BISON_DIR}/win_bison.exe")
-      if(EXISTS "${BISON_EXECUTABLE}")
-        set(BISON_FOUND TRUE)
-        set(BISON_VERSION "2.7") # win_bison 2.4 matches bison 2.7+ features enough
-        # Manually define bison_target as FindBISON.cmake won't if it didn't find bison
-        if(NOT COMMAND bison_target)
-          macro(bison_target Name Yaml Output)
-            set(BISON_${Name}_OUTPUTS "${CMAKE_CURRENT_BINARY_DIR}/${Output}")
-            # ARGV3 should be DEFINES_FILE, ARGV4 the header filename
-            set(BISON_${Name}_DEFINES "${CMAKE_CURRENT_BINARY_DIR}/${ARGV4}")
-            add_custom_command(
-              OUTPUT "${BISON_${Name}_OUTPUTS}" "${BISON_${Name}_DEFINES}"
-              COMMAND "${BISON_EXECUTABLE}" -d -o "${BISON_${Name}_OUTPUTS}" "${Yaml}"
-              DEPENDS "${Yaml}"
-              VERBATIM)
-          endmacro()
+      if(SHOULD_DOWNLOAD_BISON)
+        message(STATUS "Bison not found. Attempting to download win_flex_bison...")
+        set(WIN_FLEX_BISON_URL "https://github.com/lexxmark/winflexbison/releases/download/v2.4/win_flex_bison-2.4.zip")
+        set(WIN_FLEX_BISON_DIR "${CMAKE_BINARY_DIR}/win_flex_bison")
+        if(NOT EXISTS "${WIN_FLEX_BISON_DIR}")
+          file(DOWNLOAD "${WIN_FLEX_BISON_URL}" "${CMAKE_BINARY_DIR}/win_flex_bison.zip" SHOW_PROGRESS)
+          file(ARCHIVE_EXTRACT INPUT "${CMAKE_BINARY_DIR}/win_flex_bison.zip" DESTINATION "${WIN_FLEX_BISON_DIR}")
         endif()
-      else()
-        message(FATAL_ERROR "Bison 2.7 or later is required on Windows, and automatic download failed.")
+        set(BISON_EXECUTABLE "${WIN_FLEX_BISON_DIR}/win_bison.exe")
+        if(EXISTS "${BISON_EXECUTABLE}")
+          set(BISON_FOUND TRUE)
+          set(BISON_VERSION "2.7") # win_bison 2.4 matches bison 2.7+ features enough
+          # Manually define bison_target as FindBISON.cmake won't if it didn't find bison
+          if(NOT COMMAND bison_target)
+            macro(bison_target Name Yaml Output)
+              set(BISON_${Name}_OUTPUTS "${CMAKE_CURRENT_BINARY_DIR}/${Output}")
+              # ARGV3 should be DEFINES_FILE, ARGV4 the header filename
+              set(BISON_${Name}_DEFINES "${CMAKE_CURRENT_BINARY_DIR}/${ARGV4}")
+              add_custom_command(
+                OUTPUT "${BISON_${Name}_OUTPUTS}" "${BISON_${Name}_DEFINES}"
+                COMMAND "${BISON_EXECUTABLE}" -d -o "${BISON_${Name}_OUTPUTS}" "${Yaml}"
+                DEPENDS "${Yaml}"
+                VERBATIM)
+            endmacro()
+          endif()
+        else()
+          message(FATAL_ERROR "Bison 2.7 or later is required on Windows, and automatic download failed.")
+        endif()
       endif()
     endif()
+  else()
+    find_package(BISON 2.7)
   endif()
-else()
-  find_package(BISON 2.7)
 endif()
 if(BISON_FOUND)
   bison_target(cbf_stx "${CBF__SRC}/cbf.stx.y" "cbf_stx.c"
