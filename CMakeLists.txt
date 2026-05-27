@@ -548,7 +548,8 @@ fetchcontent_declare(pcre2
 
 fetchcontent_declare(tiff
   URL "https://download.osgeo.org/libtiff/tiff-4.7.0.tar.gz"
-  URL_HASH MD5=3a0fa4a270a4a192b08913f88d0cfbdd)
+  URL_HASH MD5=3a0fa4a270a4a192b08913f88d0cfbdd
+  PATCH_COMMAND "${PATCH}" -p1 -i "${CMAKE_CURRENT_SOURCE_DIR}/patches/tiff-zstd-conflict.patch")
 
 
 #
