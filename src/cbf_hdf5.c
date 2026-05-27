@@ -18008,7 +18008,11 @@ _cbf_pilatusAxis2nexusAxisAttrs(h4data,units,depends_on,exsisItem,cmp)
         buffer[0] = '\0';
 
         strncat(buffer,verstring,50);
-        for (ii=_cbf_strlen(svnrev)-1; ii >= 0; ii--) {
+        ii = (int)_cbf_strlen(svnrev);
+
+        while (ii > 0) {
+
+            ii--;
             if (svnrev[ii] == '$' || svnrev[ii] == ' ') {
                 svnrev[ii] = '\0';
             } else break;
@@ -18022,7 +18026,11 @@ _cbf_pilatusAxis2nexusAxisAttrs(h4data,units,depends_on,exsisItem,cmp)
                 break;
             }
         }
-        for (ii=_cbf_strlen(svndate)-1; ii >= 0; ii--) {
+        ii = (int)_cbf_strlen(svndate);
+
+        while (ii > 0) {
+
+            ii--;
             if (svndate[ii] == '$' || svndate[ii] == ' ') {
                 svndate[ii] = '\0';
             } else break;
@@ -18090,7 +18098,11 @@ _cbf_pilatusAxis2nexusAxisAttrs(h4data,units,depends_on,exsisItem,cmp)
         buffer[0] = '\0';
 
         strncat(buffer,verstring,50);
-        for (ii=_cbf_strlen(svnrev)-1; ii >= 0; ii--) {
+        ii = (int)_cbf_strlen(svnrev);
+
+        while (ii > 0) {
+
+            ii--;
             if (svnrev[ii] == '$' || svnrev[ii] == ' ') {
                 svnrev[ii] = '\0';
             } else break;
@@ -18104,7 +18116,11 @@ _cbf_pilatusAxis2nexusAxisAttrs(h4data,units,depends_on,exsisItem,cmp)
                 break;
             }
         }
-        for (ii=_cbf_strlen(svndate)-1; ii >= 0; ii--) {
+        ii = (int)_cbf_strlen(svndate);
+
+        while (ii > 0) {
+
+            ii--;
             if (svndate[ii] == '$' || svndate[ii] == ' ') {
                 svndate[ii] = '\0';
             } else break;
