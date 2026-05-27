@@ -378,6 +378,67 @@ endif()
 #
 #  CBF_DEBUG_MESSAGE if CBF_CMAKE_DEBUG issue str
 #
+#
+# CBF_AUTO_INSTALL_DEPENDENCY -- attempt to install a dependency if not found
+#
+macro(CBF_AUTO_INSTALL_DEPENDENCY FIND_NAME VCPKG_NAME PORT_NAME APT_NAME)
+  set(_FOUND FALSE)
+  find_package(${FIND_NAME} QUIET)
+  if(${FIND_NAME}_FOUND OR ${FIND_NAME}_Found OR ${${FIND_NAME}_FOUND})
+    set(_FOUND TRUE)
+  endif()
+
+  if(NOT _FOUND)
+    # Fallback to pkg-config if available
+    find_package(PkgConfig QUIET)
+    if(PKG_CONFIG_FOUND)
+      pkg_check_modules(CBF_AUTO_${FIND_NAME} QUIET ${FIND_NAME})
+      if(CBF_AUTO_${FIND_NAME}_FOUND)
+        set(_FOUND TRUE)
+      endif()
+    endif()
+  endif()
+
+  if(NOT _FOUND)
+    message(STATUS "Dependency ${FIND_NAME} not found. Attempting to install...")
+    if(WIN32)
+      execute_process(COMMAND vcpkg install ${VCPKG_NAME}
+        RESULT_VARIABLE _install_res)
+    elseif(APPLE)
+      execute_process(COMMAND sudo port install ${PORT_NAME}
+        RESULT_VARIABLE _install_res)
+    elseif(UNIX AND NOT APPLE)
+      execute_process(COMMAND sudo apt-get update
+        RESULT_VARIABLE _update_res)
+      execute_process(COMMAND sudo apt-get install -y ${APT_NAME}
+        RESULT_VARIABLE _install_res)
+    endif()
+
+    if(_install_res EQUAL 0)
+      message(STATUS "Successfully installed ${FIND_NAME}. Retrying find_package...")
+      find_package(${FIND_NAME} QUIET)
+    else()
+      message(WARNING "Failed to install ${FIND_NAME}.")
+    endif()
+  endif()
+endmacro()
+
+#
+# Auto-install dependencies
+#
+CBF_AUTO_INSTALL_DEPENDENCY(BZip2 bzip2 bzip2 libbz2-dev)
+CBF_AUTO_INSTALL_DEPENDENCY(libdeflate libdeflate libdeflate libdeflate-dev)
+CBF_AUTO_INSTALL_DEPENDENCY(JPEG libjpeg-turbo libjpeg-turbo libjpeg-turbo8-dev)
+CBF_AUTO_INSTALL_DEPENDENCY(JBIG jbigkit jbigkit libjbig-dev)
+CBF_AUTO_INSTALL_DEPENDENCY(LERC lerc lerc liblerc-dev)
+CBF_AUTO_INSTALL_DEPENDENCY(LibLZMA liblzma xz liblzma-dev)
+CBF_AUTO_INSTALL_DEPENDENCY(zstd zstd zstd libzstd-dev)
+CBF_AUTO_INSTALL_DEPENDENCY(WebP libwebp webp libwebp-dev)
+CBF_AUTO_INSTALL_DEPENDENCY(GLUT freeglut freeglut freeglut3-dev)
+CBF_AUTO_INSTALL_DEPENDENCY(Editline libedit libedit libedit-dev)
+CBF_AUTO_INSTALL_DEPENDENCY(PCRE2 pcre2 pcre2 libpcre2-dev)
+CBF_AUTO_INSTALL_DEPENDENCY(HDF5 hdf5 hdf5 libhdf5-dev)
+
 macro(CBF_DEBUG_MESSAGE str)
   if(CBF_CMAKE_DEBUG)
     message(STATUS ${str})
