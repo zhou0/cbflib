@@ -375,21 +375,16 @@ endif()
 # Macros
 #
 #
+#
 # Macros
 #
 
-#
-#  CBF_DEBUG_MESSAGE if CBF_CMAKE_DEBUG issue str
-#
 macro(CBF_DEBUG_MESSAGE str)
   if(CBF_CMAKE_DEBUG)
     message(STATUS ${str})
   endif(CBF_CMAKE_DEBUG)
 endmacro (CBF_DEBUG_MESSAGE)
 
-#
-# CBF_REQUIRE_DIRECTORY -- require directory dir
-#
 macro(CBF_REQUIRE_DIRECTORY dir)
   if (NOT EXISTS "${dir}")
     file(MAKE_DIRECTORY "${dir}")
@@ -397,25 +392,20 @@ macro(CBF_REQUIRE_DIRECTORY dir)
   endif (NOT EXISTS "${dir}")
 endmacro(CBF_REQUIRE_DIRECTORY)
 
-#
-# CBF_AUTO_INSTALL_DEPENDENCY -- attempt to install a dependency if not found
-#
 macro(CBF_AUTO_INSTALL_DEPENDENCY FIND_NAME VCPKG_NAME PORT_NAME APT_NAME CONDITION)
   if(${CONDITION})
     set(_FOUND FALSE)
-    if("${FIND_NAME}" STREQUAL "BISON")
-      find_package(${FIND_NAME} 2.7 QUIET)
-    elseif("${FIND_NAME}" STREQUAL "zstd" AND WIN32)
-      find_package(zstd CONFIG QUIET)
+    if("${FIND_NAME}" STREQUAL "zstd" AND WIN32)
+      # On Windows, check for zstd.h to avoid target pollution that conflicts with LibTIFF
+      find_path(ZSTD_CHECK_INCLUDE NAMES zstd.h QUIET)
+      if(ZSTD_CHECK_INCLUDE)
+        set(_FOUND TRUE)
+      endif()
     else()
       find_package(${FIND_NAME} QUIET)
-    endif()
-
-    if(${FIND_NAME}_FOUND OR ${FIND_NAME}_Found OR ${${FIND_NAME}_FOUND})
-      set(_FOUND TRUE)
-    endif()
-    if("${FIND_NAME}" STREQUAL "zstd" AND (TARGET zstd::libzstd_shared OR TARGET zstd::libzstd_static))
-      set(_FOUND TRUE)
+      if(${FIND_NAME}_FOUND OR ${FIND_NAME}_Found OR ${${FIND_NAME}_FOUND})
+        set(_FOUND TRUE)
+      endif()
     endif()
 
     if(NOT _FOUND)
@@ -435,32 +425,18 @@ macro(CBF_AUTO_INSTALL_DEPENDENCY FIND_NAME VCPKG_NAME PORT_NAME APT_NAME CONDIT
         if(NOT "${VCPKG_NAME}" STREQUAL "SKIP")
           execute_process(COMMAND vcpkg install ${VCPKG_NAME} RESULT_VARIABLE _install_res)
         endif()
-      elseif(APPLE)
+      elif(APPLE)
         if(NOT "${PORT_NAME}" STREQUAL "SKIP")
           execute_process(COMMAND sudo port install ${PORT_NAME} RESULT_VARIABLE _install_res)
         endif()
-      elseif(UNIX AND NOT APPLE)
+      elif(UNIX AND NOT APPLE)
         if(NOT "${APT_NAME}" STREQUAL "SKIP")
           execute_process(COMMAND sudo apt-get install -y ${APT_NAME} RESULT_VARIABLE _install_res)
         endif()
       endif()
-
       if(_install_res EQUAL 0)
         message(STATUS "Successfully installed ${FIND_NAME}. Retrying find_package...")
-        if("${FIND_NAME}" STREQUAL "BISON")
-          find_package(${FIND_NAME} 2.7 QUIET)
-        elseif("${FIND_NAME}" STREQUAL "zstd" AND WIN32)
-          find_package(zstd CONFIG QUIET)
-        else()
-          find_package(${FIND_NAME} QUIET)
-        endif()
-        # Re-check found status
-        if(${FIND_NAME}_FOUND OR ${FIND_NAME}_Found OR ${${FIND_NAME}_FOUND})
-          set(_FOUND TRUE)
-        endif()
-        if(NOT _FOUND AND PKG_CONFIG_FOUND)
-           pkg_check_modules(CBF_AUTO_${FIND_NAME} QUIET ${FIND_NAME})
-        endif()
+        find_package(${FIND_NAME} QUIET)
       else()
         if(NOT _FOUND)
           message(WARNING "Failed to install ${FIND_NAME} (or installation skipped).")
@@ -470,9 +446,6 @@ macro(CBF_AUTO_INSTALL_DEPENDENCY FIND_NAME VCPKG_NAME PORT_NAME APT_NAME CONDIT
   endif()
 endmacro()
 
-#
-# Auto-install dependencies
-#
 set(NOT_CBF_WITH_LIBTIFF NOT CBF_WITH_LIBTIFF)
 set(NOT_CBF_WITH_PCRE2 NOT CBF_WITH_PCRE2)
 set(NOT_CBF_WITH_HDF5 NOT CBF_WITH_HDF5)
@@ -489,8 +462,7 @@ CBF_AUTO_INSTALL_DEPENDENCY(GLUT freeglut freeglut freeglut3-dev TRUE)
 CBF_AUTO_INSTALL_DEPENDENCY(Editline SKIP libedit libedit-dev TRUE)
 CBF_AUTO_INSTALL_DEPENDENCY(PCRE2 pcre2 pcre2 libpcre2-dev NOT_CBF_WITH_PCRE2)
 CBF_AUTO_INSTALL_DEPENDENCY(HDF5 hdf5 hdf5 libhdf5-dev NOT_CBF_WITH_HDF5)
-CBF_AUTO_INSTALL_DEPENDENCY(BISON SKIP bison bison TRUE)
-CBF_AUTO_INSTALL_DEPENDENCY(SWIG swig swig swig TRUE)
+
 set(CBF__SRC       "${CBFlib_SOURCE_DIR}/src" )
 set(CBF__INCLUDE   "${CBFlib_SOURCE_DIR}/include" )
 set(CBF__DOC       "${CBFlib_SOURCE_DIR}/doc" )

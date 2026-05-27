@@ -3,12 +3,12 @@ import sys
 with open('CMakeLists.txt', 'r') as f:
     lines = f.readlines()
 
-# Find the start and end markers
 start_idx = -1
 end_idx = -1
 for i, line in enumerate(lines):
     if '# Macros' in line and i > 300 and i < 400:
         start_idx = i
+        # Keep searching for the LAST marker in that range to avoid double blocks
     if 'set(CBF__SRC' in line and i > 450 and i < 600:
         end_idx = i
         break
@@ -30,19 +30,18 @@ if start_idx != -1 and end_idx != -1:
     new_content.append("macro(CBF_AUTO_INSTALL_DEPENDENCY FIND_NAME VCPKG_NAME PORT_NAME APT_NAME CONDITION)\n")
     new_content.append("  if(${CONDITION})\n")
     new_content.append("    set(_FOUND FALSE)\n")
-    new_content.append("    if(\"${FIND_NAME}\" STREQUAL \"BISON\")\n")
-    new_content.append("      find_package(${FIND_NAME} 2.7 QUIET)\n")
-    new_content.append("    elseif(\"${FIND_NAME}\" STREQUAL \"zstd\" AND WIN32)\n")
-    new_content.append("      find_package(zstd CONFIG QUIET)\n")
+    new_content.append("    if(\"${FIND_NAME}\" STREQUAL \"zstd\" AND WIN32)\n")
+    new_content.append("      # On Windows, check for zstd.h to avoid target pollution that conflicts with LibTIFF\n")
+    new_content.append("      find_path(ZSTD_CHECK_INCLUDE NAMES zstd.h QUIET)\n")
+    new_content.append("      if(ZSTD_CHECK_INCLUDE)\n")
+    new_content.append("        set(_FOUND TRUE)\n")
+    new_content.append("      endif()\n")
     new_content.append("    else()\n")
     new_content.append("      find_package(${FIND_NAME} QUIET)\n")
-    new_content.append("    endif()\n")
-    new_content.append("    if(${FIND_NAME}_FOUND OR ${FIND_NAME}_Found OR ${${FIND_NAME}_FOUND})\n")
-    new_content.append("      set(_FOUND TRUE)\n")
-    new_content.append("    endif()\n")
-    new_content.append("    if(\"${FIND_NAME}\" STREQUAL \"zstd\" AND (TARGET zstd::libzstd_shared OR TARGET zstd::libzstd_static))\n")
-    new_content.append("      set(_FOUND TRUE)\n")
-    new_content.append("    endif()\n")
+    new_content.append("      if(${FIND_NAME}_FOUND OR ${FIND_NAME}_Found OR ${${FIND_NAME}_FOUND})\n")
+    new_content.append("        set(_FOUND TRUE)\n")
+    new_content.append("      endif()\n")
+    new_content.append("    endif()\n\n")
     new_content.append("    if(NOT _FOUND)\n")
     new_content.append("      find_package(PkgConfig QUIET)\n")
     new_content.append("      if(PKG_CONFIG_FOUND)\n")
@@ -51,7 +50,7 @@ if start_idx != -1 and end_idx != -1:
     new_content.append("          set(_FOUND TRUE)\n")
     new_content.append("        endif()\n")
     new_content.append("      endif()\n")
-    new_content.append("    endif()\n")
+    new_content.append("    endif()\n\n")
     new_content.append("    if(NOT _FOUND)\n")
     new_content.append("      message(STATUS \"Dependency ${FIND_NAME} not found. Attempting to install...\")\n")
     new_content.append("      set(_install_res 1)\n")
@@ -70,21 +69,7 @@ if start_idx != -1 and end_idx != -1:
     new_content.append("      endif()\n")
     new_content.append("      if(_install_res EQUAL 0)\n")
     new_content.append("        message(STATUS \"Successfully installed ${FIND_NAME}. Retrying find_package...\")\n")
-    new_content.append("        if(\"${FIND_NAME}\" STREQUAL \"BISON\")\n")
-    new_content.append("          find_package(${FIND_NAME} 2.7 QUIET)\n")
-    new_content.append("        # Fixed the elif to elseif here!\n")
-    new_content.append("        elif(\"${FIND_NAME}\" STREQUAL \"zstd\" AND WIN32)\n")
-    new_content.append("          find_package(zstd CONFIG QUIET)\n")
-    new_content.append("        else()\n")
-    new_content.append("          find_package(${FIND_NAME} QUIET)\n")
-    new_content.append("        endif()\n")
-    new_content.append("        # Re-check found status\n")
-    new_content.append("        if(${FIND_NAME}_FOUND OR ${FIND_NAME}_Found OR ${${FIND_NAME}_FOUND})\n")
-    new_content.append("          set(_FOUND TRUE)\n")
-    new_content.append("        endif()\n")
-    new_content.append("        if(NOT _FOUND AND PKG_CONFIG_FOUND)\n")
-    new_content.append("           pkg_check_modules(CBF_AUTO_${FIND_NAME} QUIET ${FIND_NAME})\n")
-    new_content.append("        endif()\n")
+    new_content.append("        find_package(${FIND_NAME} QUIET)\n")
     new_content.append("      else()\n")
     new_content.append("        if(NOT _FOUND)\n")
     new_content.append("          message(WARNING \"Failed to install ${FIND_NAME} (or installation skipped).\")\n")
@@ -107,9 +92,7 @@ if start_idx != -1 and end_idx != -1:
     new_content.append("CBF_AUTO_INSTALL_DEPENDENCY(GLUT freeglut freeglut freeglut3-dev TRUE)\n")
     new_content.append("CBF_AUTO_INSTALL_DEPENDENCY(Editline SKIP libedit libedit-dev TRUE)\n")
     new_content.append("CBF_AUTO_INSTALL_DEPENDENCY(PCRE2 pcre2 pcre2 libpcre2-dev NOT_CBF_WITH_PCRE2)\n")
-    new_content.append("CBF_AUTO_INSTALL_DEPENDENCY(HDF5 hdf5 hdf5 libhdf5-dev NOT_CBF_WITH_HDF5)\n")
-    new_content.append("CBF_AUTO_INSTALL_DEPENDENCY(BISON bison bison bison TRUE)\n")
-    new_content.append("CBF_AUTO_INSTALL_DEPENDENCY(SWIG swig swig swig TRUE)\n\n")
+    new_content.append("CBF_AUTO_INSTALL_DEPENDENCY(HDF5 hdf5 hdf5 libhdf5-dev NOT_CBF_WITH_HDF5)\n\n")
     new_content.extend(lines[end_idx:])
 
     with open('CMakeLists.txt', 'w') as f:
