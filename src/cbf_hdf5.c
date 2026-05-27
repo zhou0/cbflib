@@ -3433,9 +3433,13 @@ if (CBF_SUCCESS==found) {
                 if (H5Tequal(mem_type, H5T_NATIVE_ULONG)) uxdata = *((unsigned long *)data);
 
                 if (sign) {
-                    sprintf(ivalue,"%ld",xdata);
+                    if (ivalue) {
+                        sprintf(ivalue,"%ld",xdata);
+                    }
                 } else {
-                    sprintf(ivalue,"%lu",uxdata);
+                    if (ivalue) {
+                        sprintf(ivalue,"%lu",uxdata);
+                    }
                 }
 
                 *value = ivalue;
@@ -18008,7 +18012,11 @@ _cbf_pilatusAxis2nexusAxisAttrs(h4data,units,depends_on,exsisItem,cmp)
         buffer[0] = '\0';
 
         strncat(buffer,verstring,50);
-        for (ii=_cbf_strlen(svnrev)-1; ii >= 0; ii--) {
+        ii = (int)_cbf_strlen(svnrev);
+
+        while (ii > 0) {
+
+            ii--;
             if (svnrev[ii] == '$' || svnrev[ii] == ' ') {
                 svnrev[ii] = '\0';
             } else break;
@@ -18022,7 +18030,11 @@ _cbf_pilatusAxis2nexusAxisAttrs(h4data,units,depends_on,exsisItem,cmp)
                 break;
             }
         }
-        for (ii=_cbf_strlen(svndate)-1; ii >= 0; ii--) {
+        ii = (int)_cbf_strlen(svndate);
+
+        while (ii > 0) {
+
+            ii--;
             if (svndate[ii] == '$' || svndate[ii] == ' ') {
                 svndate[ii] = '\0';
             } else break;
@@ -18090,7 +18102,11 @@ _cbf_pilatusAxis2nexusAxisAttrs(h4data,units,depends_on,exsisItem,cmp)
         buffer[0] = '\0';
 
         strncat(buffer,verstring,50);
-        for (ii=_cbf_strlen(svnrev)-1; ii >= 0; ii--) {
+        ii = (int)_cbf_strlen(svnrev);
+
+        while (ii > 0) {
+
+            ii--;
             if (svnrev[ii] == '$' || svnrev[ii] == ' ') {
                 svnrev[ii] = '\0';
             } else break;
@@ -18104,7 +18120,11 @@ _cbf_pilatusAxis2nexusAxisAttrs(h4data,units,depends_on,exsisItem,cmp)
                 break;
             }
         }
-        for (ii=_cbf_strlen(svndate)-1; ii >= 0; ii--) {
+        ii = (int)_cbf_strlen(svndate);
+
+        while (ii > 0) {
+
+            ii--;
             if (svndate[ii] == '$' || svndate[ii] == ' ') {
                 svndate[ii] = '\0';
             } else break;
@@ -28947,11 +28967,15 @@ CBF_CALL(CBFM_pilatusAxis2nexusAxisAttrs(h5data,token,"",axisItem,cmp_double,cmp
 
                         if (sign) {
 
-                            sprintf(ivalue,"%ld",xdata);
+                            if (ivalue) {
+                                sprintf(ivalue,"%ld",xdata);
+                            }
 
                         } else {
 
-                            sprintf(ivalue,"%lu",uxdata);
+                            if (ivalue) {
+                                sprintf(ivalue,"%lu",uxdata);
+                            }
 
                         }
 
@@ -29598,11 +29622,15 @@ CBF_CALL(CBFM_pilatusAxis2nexusAxisAttrs(h5data,token,"",axisItem,cmp_double,cmp
 
                         if (sign) {
 
-                            sprintf(ivalue,"%ld",xdata);
+                            if (ivalue) {
+                                sprintf(ivalue,"%ld",xdata);
+                            }
 
                         } else {
 
-                            sprintf(ivalue,"%lu",uxdata);
+                            if (ivalue) {
+                                sprintf(ivalue,"%lu",uxdata);
+                            }
 
                         }
 
@@ -30038,11 +30066,15 @@ CBF_CALL(CBFM_pilatusAxis2nexusAxisAttrs(h5data,token,"",axisItem,cmp_double,cmp
 
                         if (sign) {
 
-                            sprintf(ivalue,"%ld",xdata);
+                            if (ivalue) {
+                                sprintf(ivalue,"%ld",xdata);
+                            }
 
                         } else {
 
-                            sprintf(ivalue,"%lu",uxdata);
+                            if (ivalue) {
+                                sprintf(ivalue,"%lu",uxdata);
+                            }
 
                         }
 
