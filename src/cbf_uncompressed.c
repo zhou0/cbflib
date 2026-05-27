@@ -253,15 +253,17 @@ extern "C" {
 
 #endif
 
+#if !defined(_MSC_VER)
+#ifndef _XOPEN_SOURCE
+#define _XOPEN_SOURCE 700
+#endif
+#endif
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <limits.h>
 #include <ctype.h>
-#if !defined(_MSC_VER)
-#define __USE_XOPEN
-#define _XOPEN_SOURCE
-#endif
+
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
