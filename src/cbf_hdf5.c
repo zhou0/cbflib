@@ -22479,9 +22479,9 @@ _cbf_pilatusAxis2nexusAxisAttrs(h4data,units,depends_on,exsisItem,cmp)
                                                 const int n = snprintf(
                                                                        _data_encoding,
                                                                        _data_encoding_size,
-                                                                       "%ssigned %lu-bit integer",
+                                                                       "%ssigned %zu-bit integer",
                                                                        H5T_SGN_2==h5sign?"":"un",
-                                                                       (unsigned long)8*elem_size
+                                                                       8*elem_size
                                                                        );
                                                 /* check if the string was formed successfully */
                                                 if (n > -1 && n < (ssize_t)_data_encoding_size) break;
