@@ -162,3 +162,16 @@
 +    message(FATAL_ERROR "${command}: ${error}")
 +  endif()
 +endforeach()
+--- a/cqrlib.c
++++ b/cqrlib.c
+@@ -64,9 +64,9 @@
+
+ #endif
+
+-#ifdef _MSC_VER
++#if defined(_MSC_VER) && !defined(USE_LOCAL_HEADERS)
+ #define USE_LOCAL_HEADERS
+ #endif
+ #ifndef USE_LOCAL_HEADERS
+ #include <cqrlib.h>
+ #else
