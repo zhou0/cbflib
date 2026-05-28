@@ -501,7 +501,7 @@ endif
 # Definitions to get a version of CQRLIB 
 #
 CQRLIB  ?=  cqrlib
-CQRLIB_URL ?= https://github.com/yayahjb/$(CQRLIB).git
+CQRLIB_URL ?= https://github.com/zhou0/cqrlib.git
 CQRLIBdep = $(CQRLIB) 
 CQRLIBsrc = $(CQRLIB)
 CQRLIBinclude = $(CQRLIB)
