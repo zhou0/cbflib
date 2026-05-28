@@ -164,7 +164,7 @@
 +endforeach()
 --- a/cqrlib.c
 +++ b/cqrlib.c
-@@ -64,9 +64,9 @@
+@@ -63,7 +63,7 @@
 
  #endif
 
@@ -173,5 +173,3 @@
  #define USE_LOCAL_HEADERS
  #endif
  #ifndef USE_LOCAL_HEADERS
- #include <cqrlib.h>
- #else
