@@ -796,15 +796,15 @@ extern "C" {
                 cbf_reportnez (cbf_write_string (tempfile, text), errorcode);
                 
                 if (realarray) {
-                    sprintf (text, "X-Binary-Element-Type: \"signed %zd-bit real IEEE\"
-", elsize*CHAR_BIT);
+                    sprintf (text, "X-Binary-Element-Type: \"signed %zd-bit real IEEE\"\n",
+                             elsize*CHAR_BIT);
                 } else {
                     if (elsign)
-                        sprintf (text, "X-Binary-Element-Type: \"signed %zd-bit integer\"
-", elsize*CHAR_BIT);
+                        sprintf (text, "X-Binary-Element-Type: \"signed %zd-bit integer\"\n",
+                                 elsize*CHAR_BIT);
                     else
-                        sprintf (text, "X-Binary-Element-Type: \"unsigned %zd-bit integer\"
-", elsize*CHAR_BIT);
+                        sprintf (text, "X-Binary-Element-Type: \"unsigned %zd-bit integer\"\n",
+                                 elsize*CHAR_BIT);
                 }
                 
                 cbf_reportnez (cbf_write_string (tempfile, text), errorcode);
