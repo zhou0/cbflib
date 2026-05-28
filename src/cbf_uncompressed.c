@@ -9,6 +9,10 @@
  * (C) Copyright 2006, 2007 Herbert J. Bernstein                      *
  *                                                                    *
  **********************************************************************/
+#if !defined(_MSC_VER) && !defined(_XOPEN_SOURCE)
+#define _XOPEN_SOURCE 600
+#endif
+
 
 /**********************************************************************
  *                                                                    *
@@ -258,10 +262,6 @@ extern "C" {
 #include <string.h>
 #include <limits.h>
 #include <ctype.h>
-#if !defined(_MSC_VER)
-#define __USE_XOPEN
-#define _XOPEN_SOURCE
-#endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
