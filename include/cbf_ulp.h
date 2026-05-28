@@ -32,7 +32,7 @@ extern "C" {
 
 #ifndef isinf
 #define isinf32(x) (!(((*(unsigned int*)&x)&0x7fffffff)^0x7f800000))
-#define isinf64(x) (!(((*(uint64_t*)&x)&0x7fffffffffffffffl)^0x7ff0000000000000l))
+#define isinf64(x) (!(((*(uint64_t*)&x)&UINT64_C(0x7fffffffffffffff))^UINT64_C(0x7ff0000000000000)))
 #else
 #define isinf32(x) isinf(x)
 #define isinf64(x) isinf(x)
@@ -40,7 +40,7 @@ extern "C" {
 
 #ifndef isnan
 #define isnan32(x) (((*(unsigned int*)&x)&0x007fffff)&&!(((*(unsigned int*)&x)&0x7f800000)^0x7f800000))
-#define isnan64(x) (((*(uint64_t*)&x)&0x000fffffffffffffl)&&!(((*(uint64_t*)&x)&0x7ff0000000000000l)^0x7ff0000000000000l))
+#define isnan64(x) (((*(uint64_t*)&x)&UINT64_C(0x000fffffffffffff))&&!(((*(uint64_t*)&x)&UINT64_C(0x7ff0000000000000))^UINT64_C(0x7ff0000000000000)))
 #else
 #define isnan32(x) isnan(x)
 #define isnan64(x) isnan(x)
