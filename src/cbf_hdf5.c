@@ -4356,7 +4356,7 @@ fprintf(logFile,"Config parsing error on line %lu: expected " #TKN ", got '%s'\n
 #define REQUIRE_NOT_EOL() \
 CBFM_PROLOG { \
 if (!strcmp("\n",*buf)) { \
-fprintf(logFile,"Config parsing error on line %lu: unexpected newline\n",*ln); \
+fprintf(logFile,"Config parsing error on line %lu: unexpected newline\n",(unsigned long)*ln); \
     return cbf_configError_unexpectedInput; \
 } \
 } CBFM_EPILOG
@@ -4370,7 +4370,7 @@ fprintf(logFile,"Config parsing error on line %lu: unexpected newline\n",*ln); \
         errno = 0;
         it->vector[0] = strtod(*buf, &end);
         if (errno != 0 || end == *buf) {
-            fprintf(logFile,"Config parsing error on line %lu: expected a number, got '%s'\n",*ln,*buf);
+            fprintf(logFile,"Config parsing error on line %lu: expected a number, got '%s'\n",(unsigned long)*ln,*buf);
             return cbf_configError_expectedNumber;
         }
         GET_TOKEN();
@@ -4378,7 +4378,7 @@ fprintf(logFile,"Config parsing error on line %lu: unexpected newline\n",*ln); \
         errno = 0;
         it->vector[1] = strtod(*buf, &end);
         if (errno != 0 || end == *buf) {
-            fprintf(logFile,"Config parsing error on line %lu: expected a number, got '%s'\n",*ln,*buf);
+            fprintf(logFile,"Config parsing error on line %lu: expected a number, got '%s'\n",(unsigned long)*ln,*buf);
             return cbf_configError_expectedNumber;
         }
         GET_TOKEN();
@@ -4386,7 +4386,7 @@ fprintf(logFile,"Config parsing error on line %lu: unexpected newline\n",*ln); \
         errno = 0;
         it->vector[2] = strtod(*buf, &end);
         if (errno != 0 || end == *buf) {
-            fprintf(logFile,"Config parsing error on line %lu: expected a number, got '%s'\n",*ln,*buf);
+            fprintf(logFile,"Config parsing error on line %lu: expected a number, got '%s'\n",(unsigned long)*ln,*buf);
             return cbf_configError_expectedNumber;
         }
         /* literal ']'. */
@@ -4435,7 +4435,7 @@ return e; \
 CBFM_PROLOG { \
 const char * const _tkn = (TKN); \
 if (strcmp(_tkn,tkn)) { \
-fprintf(logFile,"Config parsing error on line %lu: expected " #TKN ", got '%s'\n",ln,tkn); \
+fprintf(logFile,"Config parsing error on line %lu: expected " #TKN ", got '%s'\n",(unsigned long)ln,tkn); \
 return cbf_configError_unexpectedInput; \
 } \
 } CBFM_EPILOG
@@ -4443,7 +4443,7 @@ return cbf_configError_unexpectedInput; \
 #define REQUIRE_EOL() \
 CBFM_PROLOG { \
 if (strcmp("\n",tkn)) { \
-fprintf(logFile,"Config parsing error on line %lu: expected '\\n', got '%s'\n",ln,tkn); \
+fprintf(logFile,"Config parsing error on line %lu: expected '\\n', got '%s'\n",(unsigned long)ln,tkn); \
 return cbf_configError_unexpectedInput; \
 } \
 } CBFM_EPILOG
@@ -4451,7 +4451,7 @@ return cbf_configError_unexpectedInput; \
 #define REQUIRE_NOT_EOL() \
 CBFM_PROLOG { \
 if (!strcmp("\n",tkn)) { \
-fprintf(logFile,"Config parsing error on line %lu: unexpected newline\n",ln); \
+fprintf(logFile,"Config parsing error on line %lu: unexpected newline\n",(unsigned long)ln); \
 return cbf_configError_unexpectedInput; \
 } \
 } CBFM_EPILOG
@@ -4459,7 +4459,7 @@ return cbf_configError_unexpectedInput; \
 #define REQUIRE_NEXUS_AXIS() \
 CBFM_PROLOG { \
 if (strcmp(".",tkn) && cbf_config_end(vec) == cbf_config_findNexus(vec,tkn)) { \
-fprintf(logFile,"Config parsing error on line %lu: Nexus axis '%s' not defined\n",ln,tkn); \
+fprintf(logFile,"Config parsing error on line %lu: Nexus axis '%s' not defined\n",(unsigned long)ln,tkn); \
 return cbf_configError_undefinedValue; \
 } \
 } CBFM_EPILOG
@@ -4484,7 +4484,7 @@ return e; \
                 REQUIRE_NOT_EOL();
                 it = cbf_config_findMinicbf(vec,tkn);
                 if (cbf_config_end(vec) != it) {
-                    fprintf(logFile,"Config parsing error on line %lu: Duplicate axis definition for minicbf axis '%s'\n",ln,tkn);
+                    fprintf(logFile,"Config parsing error on line %lu: Duplicate axis definition for minicbf axis '%s'\n",(unsigned long)ln,tkn);
                     return cbf_configError_duplicateField;
                 }
                 it = cbf_config_push(vec,cbf_configItem_create());
@@ -4497,7 +4497,7 @@ return e; \
                 GET_TOKEN();
                 REQUIRE_NOT_EOL();
                 if (cbf_config_end(vec) != cbf_config_findNexus(vec,tkn)) {
-                    fprintf(logFile,"Config parsing error on line %lu: Duplicate axis definition for Nexus axis '%s'\n",ln,tkn);
+                    fprintf(logFile,"Config parsing error on line %lu: Duplicate axis definition for Nexus axis '%s'\n",(unsigned long)ln,tkn);
                     return cbf_configError_duplicateField;
                 }
                 it->nexus = _cbf_strdup(tkn);
@@ -4522,7 +4522,7 @@ return e; \
                 /* find entry by nexus axis name */
                 cbf_configItem_t * const it = cbf_config_findNexus(vec,tkn);
                 if (cbf_config_end(vec) == it) {
-                    fprintf(logFile,"Config parsing error on line %lu: Nexus axis '%s' not defined\n",ln,tkn);
+                    fprintf(logFile,"Config parsing error on line %lu: Nexus axis '%s' not defined\n",(unsigned long)ln,tkn);
                     return cbf_configError_undefinedValue;
                 }
                 /* match depends-on -> vector OR vector -> depends-on. */
