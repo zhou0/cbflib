@@ -521,10 +521,10 @@ include(FetchContent)
 find_program(PATCH patch REQUIRED)
 
 fetchcontent_declare(cqrlib
-  URL "https://github.com/yayahjb/cqrlib/archive/refs/tags/CQRlib-1.1.4.tar.gz"
-  URL_HASH MD5=629a349ed5e8bf6f2a69a2fb1da11c45
+  URL "https://github.com/zhou0/cqrlib/archive/refs/tags/1.1.5.tar.gz"
+  URL_HASH MD5=6cad94de20ef8384b030ccc7ca002da6
   PATCH_COMMAND "${PATCH}"
-    -N -i "${CMAKE_CURRENT_SOURCE_DIR}/patches/cqrlib-1.1.4.patch" -p 1 -t)
+    -N -i "${CMAKE_CURRENT_SOURCE_DIR}/patches/cqrlib-1.1.5.patch" -p 1 -t)
 
 fetchcontent_declare(data_input
   URL "http://downloads.sf.net/cbflib/CBFlib_${PROJECT_VERSION}_Data_Files_Input.tar.gz"
