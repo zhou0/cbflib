@@ -457,6 +457,7 @@ set(NOT_CBF_WITH_LIBTIFF NOT CBF_WITH_LIBTIFF)
 set(NOT_CBF_WITH_PCRE2 NOT CBF_WITH_PCRE2)
 set(NOT_CBF_WITH_HDF5 NOT CBF_WITH_HDF5)
 
+CBF_AUTO_INSTALL_DEPENDENCY(BISON SKIP SKIP bison bison bison TRUE)
 CBF_AUTO_INSTALL_DEPENDENCY(BZip2 bzip2 bzip2 libbz2-dev bzip2-devel bzip2 NOT_CBF_WITH_LIBTIFF)
 CBF_AUTO_INSTALL_DEPENDENCY(libdeflate libdeflate libdeflate libdeflate-dev libdeflate-devel libdeflate NOT_CBF_WITH_LIBTIFF)
 CBF_AUTO_INSTALL_DEPENDENCY(JPEG libjpeg-turbo libjpeg-turbo libjpeg-turbo8-dev libjpeg-turbo-devel libjpeg-turbo NOT_CBF_WITH_LIBTIFF)
@@ -470,7 +471,7 @@ CBF_AUTO_INSTALL_DEPENDENCY(Editline SKIP libedit libedit-dev libedit-devel libe
 CBF_AUTO_INSTALL_DEPENDENCY(PCRE2 pcre2 pcre2 libpcre2-dev pcre2-devel pcre2 NOT_CBF_WITH_PCRE2)
 CBF_AUTO_INSTALL_DEPENDENCY(ZLIB zlib zlib zlib1g-dev zlib-devel zlib NOT_CBF_WITH_HDF5)
 CBF_AUTO_INSTALL_DEPENDENCY(libaec libaec libaec libaec-dev libaec-devel libaec NOT_CBF_WITH_HDF5)
-CBF_AUTO_INSTALL_DEPENDENCY(libszaec libaec libaec libaec-dev libaec-devel libaec NOT_CBF_WITH_HDF5)
+CBF_AUTO_INSTALL_DEPENDENCY(SZIP libaec libaec libaec-dev libaec-devel libaec NOT_CBF_WITH_HDF5)
 CBF_AUTO_INSTALL_DEPENDENCY(HDF5 hdf5 hdf5 libhdf5-dev hdf5-devel hdf5 NOT_CBF_WITH_HDF5)
 
 set(CBF__SRC       "${CBFlib_SOURCE_DIR}/src" )
@@ -651,17 +652,17 @@ if(CBF_WITH_HDF5)
     "https://github.com/MathisRosenhauer/libaec/releases/download/v1.1.3"
     CACHE INTERNAL
     "Use LIBAEC from original location")
-  set(ZLIB_BUILD_SHARED_LIBS ON CACHE BOOL "Build shared zlib" FORCE)
-  set(ZLIB_BUILD_STATIC_LIBS OFF CACHE BOOL "Build static zlib" FORCE)
-  set(LIBAEC_BUILD_SHARED_LIBS ON CACHE BOOL "Build shared libaec" FORCE)
-  set(LIBAEC_BUILD_STATIC_LIBS OFF CACHE BOOL "Build static libaec" FORCE)
-  set(HDF5_USE_LIBAEC_STATIC OFF CACHE BOOL "Use shared libaec" FORCE)
   set(ZLIB_TGZ_NAME "zlib-1.3.1.tar.gz" CACHE INTERNAL
     "Use HDF5_ZLib from compressed file")
   set(ZLIB_TGZ_ORIGPATH
     "https://github.com/madler/zlib/releases/download/v1.3.1"
     CACHE INTERNAL
     "Use zlib from original location")
+
+  # Try to use system libraries first (installed by auto-install macro)
+  set(ZLIB_USE_EXTERNAL ON CACHE BOOL "" FORCE)
+  set(SZIP_USE_EXTERNAL ON CACHE BOOL "" FORCE)
+
   fetchcontent_makeavailable(hdf5)
 
   set(_h5dump_executable
@@ -671,6 +672,7 @@ if(CBF_WITH_HDF5)
   else()
     set(_hdf5_target hdf5-static)
   endif()
+
 else()
   if(WIN32)
     find_package(HDF5 REQUIRED CONFIG)
@@ -2841,7 +2843,7 @@ if(BUILD_SHARED_LIBS AND CBF_ENABLE_PYTHON)
       "${CBF__DATA}/pycbf_test1.raw")
   set_tests_properties(pycbf-test1 PROPERTIES
     ENVIRONMENT "PYTHONPATH=$<TARGET_FILE_DIR:pycbf>"
-    FIXTURES_REQUIRED "img2cif-flatpacked-cif"
+    FIXTURES_REQUIRED "testhdf5;img2cif-flatpacked-cif"
     FIXTURES_SETUP pycbf-test1
     REQUIRED_FILES "${CMAKE_CURRENT_SOURCE_DIR}/pycbf/pycbf_test1.py")
 
@@ -2881,7 +2883,7 @@ if(BUILD_SHARED_LIBS AND CBF_ENABLE_PYTHON)
       "${CBF__DATA}/pycbf_test2.raw")
   set_tests_properties(pycbf-test2 PROPERTIES
     ENVIRONMENT "PYTHONPATH=$<TARGET_FILE_DIR:pycbf>"
-    FIXTURES_REQUIRED "convert_image-adscimg"
+    FIXTURES_REQUIRED "testhdf5;convert_image-adscimg"
     FIXTURES_SETUP pycbf-test2
     REQUIRED_FILES "${CMAKE_CURRENT_SOURCE_DIR}/pycbf/pycbf_test2.py")
 
@@ -2918,6 +2920,7 @@ if(BUILD_SHARED_LIBS AND CBF_ENABLE_PYTHON)
     COMMAND Python::Interpreter
       "${CMAKE_CURRENT_SOURCE_DIR}/pycbf/pycbf_test3.py")
   set_tests_properties(pycbf-test3 PROPERTIES
+    FIXTURES_REQUIRED "testhdf5"
     ENVIRONMENT "PYTHONPATH=$<TARGET_FILE_DIR:pycbf>"
     REQUIRED_FILES "${CMAKE_CURRENT_SOURCE_DIR}/pycbf/pycbf_test3.py")
 
@@ -2930,7 +2933,7 @@ if(BUILD_SHARED_LIBS AND CBF_ENABLE_PYTHON)
       "${CBF__DATA}/newtest1.cbf")
   set_tests_properties(pycbf-test4 PROPERTIES
     ENVIRONMENT "PYTHONPATH=$<TARGET_FILE_DIR:pycbf>"
-    FIXTURES_REQUIRED "img2cif-flatpacked-cif"
+    FIXTURES_REQUIRED "testhdf5;img2cif-flatpacked-cif"
     FIXTURES_SETUP pycbf-test4
     REQUIRED_FILES "${CMAKE_CURRENT_SOURCE_DIR}/pycbf/pycbf_test4.py")
 

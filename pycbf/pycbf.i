@@ -42,6 +42,52 @@ __doc__=""" pycbf - python bindings to the CBFlib library
 
 
 // Used later to pass back binary data
+// Suppress Warning 451: Setting a const char * variable may leak memory
+%immutable name;
+%immutable axis_path;
+%immutable do_path;
+%immutable ra_path;
+%immutable array_id;
+%immutable datablock_id;
+%immutable diffrn_id;
+%immutable diffrn_detector_id;
+%immutable diffrn_detector_element_id;
+%immutable diffrn_measurement_id;
+%immutable frame_id;
+%immutable scan_id;
+%immutable wavelength_id;
+%immutable value;
+%immutable datablock;
+%immutable saveframe;
+%immutable category;
+%immutable column;
+%immutable nxid_name;
+%immutable nxdetector_group_name;
+%immutable nxsample_name;
+%immutable nxbeam_name;
+%immutable nxinstrument_name;
+%immutable nxgoniometer_name;
+%immutable nxmonochromator_name;
+%immutable nxsource_name;
+%immutable nxdata_name;
+%immutable nxfilename;
+%immutable dbid_name;
+%immutable sfid_name;
+%immutable catid_name;
+%immutable colid_name;
+%immutable cbf_datablock;
+%immutable cbf_saveframe;
+%immutable cbf_category;
+%immutable cbf_column;
+%immutable great_grand_parent_name;
+%immutable grand_parent_name;
+%immutable parent_name;
+%immutable optstr;
+%immutable optval;
+%immutable options;
+
+
+
 %include "cstring.i"
 
 // Attempt to autogenerate what SWIG thinks the call looks like
@@ -182,45 +228,45 @@ static char error_message[1042] ; // hope that is long enough
 void get_error_message(void);
 
 void get_error_message(){
-  sprintf(error_message1,"%s","CBFlib Error(s):");
+  snprintf(error_message1,sizeof(error_message1),"%s","CBFlib Error(s):");
   if (error_status & CBF_FORMAT        )
-    sprintf(error_message,"%s %s",error_message1,"CBF_FORMAT       "); 
+    snprintf(error_message,sizeof(error_message),"%s %s",error_message1,"CBF_FORMAT       ");
   if (error_status & CBF_ALLOC         )
-    sprintf(error_message,"%s %s",error_message1,"CBF_ALLOC        ");
+    snprintf(error_message,sizeof(error_message),"%s %s",error_message1,"CBF_ALLOC        ");
   if (error_status & CBF_ARGUMENT      )
-    sprintf(error_message,"%s %s",error_message1,"CBF_ARGUMENT     ");
+    snprintf(error_message,sizeof(error_message),"%s %s",error_message1,"CBF_ARGUMENT     ");
   if (error_status & CBF_ASCII         )
-    sprintf(error_message,"%s %s",error_message1,"CBF_ASCII        ");
+    snprintf(error_message,sizeof(error_message),"%s %s",error_message1,"CBF_ASCII        ");
   if (error_status & CBF_BINARY        )
-    sprintf(error_message,"%s %s",error_message1,"CBF_BINARY       ");
+    snprintf(error_message,sizeof(error_message),"%s %s",error_message1,"CBF_BINARY       ");
   if (error_status & CBF_BITCOUNT      )
-    sprintf(error_message,"%s %s",error_message1,"CBF_BITCOUNT     ");
+    snprintf(error_message,sizeof(error_message),"%s %s",error_message1,"CBF_BITCOUNT     ");
   if (error_status & CBF_ENDOFDATA     )
-    sprintf(error_message,"%s %s",error_message1,"CBF_ENDOFDATA    ");
+    snprintf(error_message,sizeof(error_message),"%s %s",error_message1,"CBF_ENDOFDATA    ");
   if (error_status & CBF_FILECLOSE     )
-    sprintf(error_message,"%s %s",error_message1,"CBF_FILECLOSE    ");
+    snprintf(error_message,sizeof(error_message),"%s %s",error_message1,"CBF_FILECLOSE    ");
   if (error_status & CBF_FILEOPEN      )
-    sprintf(error_message,"%s %s",error_message1,"CBF_FILEOPEN     ");
+    snprintf(error_message,sizeof(error_message),"%s %s",error_message1,"CBF_FILEOPEN     ");
   if (error_status & CBF_FILEREAD      )
-    sprintf(error_message,"%s %s",error_message1,"CBF_FILEREAD     ");
+    snprintf(error_message,sizeof(error_message),"%s %s",error_message1,"CBF_FILEREAD     ");
   if (error_status & CBF_FILESEEK      )
-    sprintf(error_message,"%s %s",error_message1,"CBF_FILESEEK     ");
+    snprintf(error_message,sizeof(error_message),"%s %s",error_message1,"CBF_FILESEEK     ");
   if (error_status & CBF_FILETELL      )
-    sprintf(error_message,"%s %s",error_message1,"CBF_FILETELL     ");
+    snprintf(error_message,sizeof(error_message),"%s %s",error_message1,"CBF_FILETELL     ");
   if (error_status & CBF_FILEWRITE     )
-    sprintf(error_message,"%s %s",error_message1,"CBF_FILEWRITE    ");
+    snprintf(error_message,sizeof(error_message),"%s %s",error_message1,"CBF_FILEWRITE    ");
   if (error_status & CBF_IDENTICAL     )
-    sprintf(error_message,"%s %s",error_message1,"CBF_IDENTICAL    ");
+    snprintf(error_message,sizeof(error_message),"%s %s",error_message1,"CBF_IDENTICAL    ");
   if (error_status & CBF_NOTFOUND      )
-    sprintf(error_message,"%s %s",error_message1,"CBF_NOTFOUND     ");
+    snprintf(error_message,sizeof(error_message),"%s %s",error_message1,"CBF_NOTFOUND     ");
   if (error_status & CBF_OVERFLOW      )
-    sprintf(error_message,"%s %s",error_message1,"CBF_OVERFLOW     ");
+    snprintf(error_message,sizeof(error_message),"%s %s",error_message1,"CBF_OVERFLOW     ");
   if (error_status & CBF_UNDEFINED     )
-    sprintf(error_message,"%s %s",error_message1,"CBF_UNDEFINED    ");
+    snprintf(error_message,sizeof(error_message),"%s %s",error_message1,"CBF_UNDEFINED    ");
   if (error_status & CBF_NOTIMPLEMENTED)
-    sprintf(error_message,"%s %s",error_message1,"CBF_NOTIMPLEMENTED");
+    snprintf(error_message,sizeof(error_message),"%s %s",error_message1,"CBF_NOTIMPLEMENTED");
   if (error_status & CBF_NOCOMPRESSION)
-    sprintf(error_message,"%s %s",error_message1,"CBF_NOCOMPRESSION");
+    snprintf(error_message,sizeof(error_message),"%s %s",error_message1,"CBF_NOCOMPRESSION");
 }
 
 

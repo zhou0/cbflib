@@ -570,8 +570,8 @@ TEST(isnan64(*(double*)&nx##n)); \
     
 #define TEST_flipped_n(n) \
 do { \
-const uint64_t px##n = px^(1l<<n); \
-const uint64_t nx##n = nx^(1l<<n); \
+const uint64_t px##n = px^(((uint64_t)1<<n)); \
+const uint64_t nx##n = nx^(((uint64_t)1<<n)); \
 TEST(!isnan64(*(double*)&px##n)); \
 TEST(!isnan64(*(double*)&nx##n)); \
 } while (0)
@@ -791,13 +791,13 @@ testResult_t test_basic32()
     
 	if (4!=sizeof(float)) {
 		++r.fail;
-		fprintf(stderr,"Fail: unexpected size of float type (%lu, expected 4)\n",sizeof(float));
+		fprintf(stderr,"Fail: unexpected size of float type (%lu, expected 4)\n",(unsigned long)sizeof(float));
 	} else {
 		++r.pass;
 	}
 	if (4!=sizeof(unsigned int)) {
 		++r.fail;
-		fprintf(stderr,"Fail: unexpected size of unsigned int type (%lu, expected 4)\n",sizeof(unsigned int));
+		fprintf(stderr,"Fail: unexpected size of unsigned int type (%lu, expected 4)\n",(unsigned long)sizeof(unsigned int));
 	} else {
 		++r.pass;
 	}
@@ -828,13 +828,13 @@ testResult_t test_basic64()
     
 	if (8!=sizeof(double)) {
 		++r.fail;
-		fprintf(stderr,"Fail: unexpected size of double type (%lu, expected 8)\n",sizeof(double));
+		fprintf(stderr,"Fail: unexpected size of double type (%lu, expected 8)\n",(unsigned long)sizeof(double));
 	} else {
 		++r.pass;
 	}
 	if (8!=sizeof(uint64_t)) {
 		++r.fail;
-		fprintf(stderr,"Fail: unexpected size of uint64_t type (%lu, expected 8)\n",sizeof(uint64_t));
+		fprintf(stderr,"Fail: unexpected size of uint64_t type (%lu, expected 8)\n",(unsigned long)sizeof(uint64_t));
 	} else {
 		++r.pass;
 	}
@@ -845,7 +845,7 @@ testResult_t test_basic64()
 		const double f_neg = *(double*)(&z_neg);
 		if (f_pos != f_neg) {
 			++r.fail;
-			fprintf(stderr,"Fail: +ve zero (%#16.16lx) != -ve zero (%#16.16lx)\n",z_pos,z_neg);
+			fprintf(stderr,"Fail: +ve zero (%#16.16llx) != -ve zero (%#16.16llx)\n",(unsigned long long)z_pos,(unsigned long long)z_neg);
 		} else {
 			++r.pass;
 		}
