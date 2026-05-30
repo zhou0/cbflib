@@ -513,7 +513,7 @@ int	adscimg2cbf_sub2(char *header,
     
     const char *direction [2];
     
-    char	s[1024], s1[1024], facility[256], temp[1024];
+    char	s[1024], s1[1024], facility[256], temp[2050];
     char  	detector_mode[40];
     char	smv_date[100], cbf_date[100];
     int   	smv_size1, smv_size2;
@@ -588,7 +588,7 @@ int	adscimg2cbf_sub2(char *header,
     strcpy(header_as_details, "\n");
     for(i = 0; 0 != gethdn(i, s, s1, header); i++)
     {
-        sprintf(temp, "%s=%s;\n", s, s1);
+        snprintf(temp, sizeof(temp), "%s=%s;\n", s, s1);
         strcat(header_as_details, temp);
     }
     

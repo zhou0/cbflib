@@ -3433,9 +3433,9 @@ if (CBF_SUCCESS==found) {
                 if (H5Tequal(mem_type, H5T_NATIVE_ULONG)) uxdata = *((unsigned long *)data);
 
                 if (sign) {
-                    sprintf(ivalue,"%ld",xdata);
+                    if (ivalue) sprintf(ivalue,"%ld",xdata);
                 } else {
-                    sprintf(ivalue,"%lu",uxdata);
+                    if (ivalue) sprintf(ivalue,"%lu",uxdata);
                 }
 
                 *value = ivalue;
@@ -28963,11 +28963,11 @@ CBF_CALL(CBFM_pilatusAxis2nexusAxisAttrs(h5data,token,"",axisItem,cmp_double,cmp
 
                         if (sign) {
 
-                            sprintf(ivalue,"%ld",xdata);
+                            if (ivalue) sprintf(ivalue,"%ld",xdata);
 
                         } else {
 
-                            sprintf(ivalue,"%lu",uxdata);
+                            if (ivalue) sprintf(ivalue,"%lu",uxdata);
 
                         }
 
@@ -29614,11 +29614,11 @@ CBF_CALL(CBFM_pilatusAxis2nexusAxisAttrs(h5data,token,"",axisItem,cmp_double,cmp
 
                         if (sign) {
 
-                            sprintf(ivalue,"%ld",xdata);
+                            if (ivalue) sprintf(ivalue,"%ld",xdata);
 
                         } else {
 
-                            sprintf(ivalue,"%lu",uxdata);
+                            if (ivalue) sprintf(ivalue,"%lu",uxdata);
 
                         }
 
@@ -30054,11 +30054,11 @@ CBF_CALL(CBFM_pilatusAxis2nexusAxisAttrs(h5data,token,"",axisItem,cmp_double,cmp
 
                         if (sign) {
 
-                            sprintf(ivalue,"%ld",xdata);
+                            if (ivalue) sprintf(ivalue,"%ld",xdata);
 
                         } else {
 
-                            sprintf(ivalue,"%lu",uxdata);
+                            if (ivalue) sprintf(ivalue,"%lu",uxdata);
 
                         }
 
