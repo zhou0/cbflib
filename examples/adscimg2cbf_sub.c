@@ -588,7 +588,7 @@ int	adscimg2cbf_sub2(char *header,
     strcpy(header_as_details, "\n");
     for(i = 0; 0 != gethdn(i, s, s1, header); i++)
     {
-        sprintf(temp, "%s=%s;\n", s, s1);
+        snprintf(temp, sizeof(temp), "%s=%s;\n", s, s1);
         strcat(header_as_details, temp);
     }
     
