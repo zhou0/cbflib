@@ -392,7 +392,7 @@ macro(CBF_REQUIRE_DIRECTORY dir)
   endif (NOT EXISTS "${dir}")
 endmacro(CBF_REQUIRE_DIRECTORY)
 
-macro(CBF_AUTO_INSTALL_DEPENDENCY FIND_NAME VCPKG_NAME PORT_NAME APT_NAME CONDITION)
+macro(CBF_AUTO_INSTALL_DEPENDENCY FIND_NAME VCPKG_NAME PORT_NAME APT_NAME DNF_NAME PACMAN_NAME CONDITION)
   if(${CONDITION})
     set(_FOUND FALSE)
     if("${FIND_NAME}" STREQUAL "zstd" AND WIN32)
@@ -430,8 +430,15 @@ macro(CBF_AUTO_INSTALL_DEPENDENCY FIND_NAME VCPKG_NAME PORT_NAME APT_NAME CONDIT
           execute_process(COMMAND sudo port install ${PORT_NAME} RESULT_VARIABLE _install_res)
         endif()
       elseif(UNIX AND NOT APPLE)
-        if(NOT "${APT_NAME}" STREQUAL "SKIP")
+        find_program(APT_COMMAND apt-get)
+        find_program(DNF_COMMAND dnf)
+        find_program(PACMAN_COMMAND pacman)
+        if(APT_COMMAND AND NOT "${APT_NAME}" STREQUAL "SKIP")
           execute_process(COMMAND sudo apt-get install -y ${APT_NAME} RESULT_VARIABLE _install_res)
+        elseif(DNF_COMMAND AND NOT "${DNF_NAME}" STREQUAL "SKIP")
+          execute_process(COMMAND sudo dnf install -y ${DNF_NAME} RESULT_VARIABLE _install_res)
+        elseif(PACMAN_COMMAND AND NOT "${PACMAN_NAME}" STREQUAL "SKIP")
+          execute_process(COMMAND sudo pacman -S --noconfirm ${PACMAN_NAME} RESULT_VARIABLE _install_res)
         endif()
       endif()
       if(_install_res EQUAL 0)
@@ -450,18 +457,22 @@ set(NOT_CBF_WITH_LIBTIFF NOT CBF_WITH_LIBTIFF)
 set(NOT_CBF_WITH_PCRE2 NOT CBF_WITH_PCRE2)
 set(NOT_CBF_WITH_HDF5 NOT CBF_WITH_HDF5)
 
-CBF_AUTO_INSTALL_DEPENDENCY(BZip2 bzip2 bzip2 libbz2-dev NOT_CBF_WITH_LIBTIFF)
-CBF_AUTO_INSTALL_DEPENDENCY(libdeflate libdeflate libdeflate libdeflate-dev NOT_CBF_WITH_LIBTIFF)
-CBF_AUTO_INSTALL_DEPENDENCY(JPEG libjpeg-turbo libjpeg-turbo libjpeg-turbo8-dev NOT_CBF_WITH_LIBTIFF)
-CBF_AUTO_INSTALL_DEPENDENCY(JBIG jbigkit jbigkit libjbig-dev NOT_CBF_WITH_LIBTIFF)
-CBF_AUTO_INSTALL_DEPENDENCY(LERC lerc lerc liblerc-dev NOT_CBF_WITH_LIBTIFF)
-CBF_AUTO_INSTALL_DEPENDENCY(LibLZMA liblzma xz liblzma-dev NOT_CBF_WITH_LIBTIFF)
-CBF_AUTO_INSTALL_DEPENDENCY(zstd zstd zstd libzstd-dev NOT_CBF_WITH_LIBTIFF)
-CBF_AUTO_INSTALL_DEPENDENCY(WebP libwebp webp libwebp-dev NOT_CBF_WITH_LIBTIFF)
-CBF_AUTO_INSTALL_DEPENDENCY(GLUT freeglut freeglut freeglut3-dev TRUE)
-CBF_AUTO_INSTALL_DEPENDENCY(Editline SKIP libedit libedit-dev TRUE)
-CBF_AUTO_INSTALL_DEPENDENCY(PCRE2 pcre2 pcre2 libpcre2-dev NOT_CBF_WITH_PCRE2)
-CBF_AUTO_INSTALL_DEPENDENCY(HDF5 hdf5 hdf5 libhdf5-dev NOT_CBF_WITH_HDF5)
+CBF_AUTO_INSTALL_DEPENDENCY(BISON SKIP SKIP bison bison bison TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(BZip2 bzip2 bzip2 libbz2-dev bzip2-devel bzip2 NOT_CBF_WITH_LIBTIFF)
+CBF_AUTO_INSTALL_DEPENDENCY(libdeflate libdeflate libdeflate libdeflate-dev libdeflate-devel libdeflate NOT_CBF_WITH_LIBTIFF)
+CBF_AUTO_INSTALL_DEPENDENCY(JPEG libjpeg-turbo libjpeg-turbo libjpeg-turbo8-dev libjpeg-turbo-devel libjpeg-turbo NOT_CBF_WITH_LIBTIFF)
+CBF_AUTO_INSTALL_DEPENDENCY(JBIG jbigkit jbigkit libjbig-dev jbigkit-devel jbigkit NOT_CBF_WITH_LIBTIFF)
+CBF_AUTO_INSTALL_DEPENDENCY(LERC lerc lerc liblerc-dev lerc-devel lerc NOT_CBF_WITH_LIBTIFF)
+CBF_AUTO_INSTALL_DEPENDENCY(LibLZMA liblzma xz liblzma-dev xz-devel xz NOT_CBF_WITH_LIBTIFF)
+CBF_AUTO_INSTALL_DEPENDENCY(zstd zstd zstd libzstd-dev libzstd-devel zstd NOT_CBF_WITH_LIBTIFF)
+CBF_AUTO_INSTALL_DEPENDENCY(WebP libwebp webp libwebp-dev libwebp-devel libwebp NOT_CBF_WITH_LIBTIFF)
+CBF_AUTO_INSTALL_DEPENDENCY(GLUT freeglut freeglut freeglut3-dev freeglut-devel freeglut TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(Editline SKIP libedit libedit-dev libedit-devel libedit TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(PCRE2 pcre2 pcre2 libpcre2-dev pcre2-devel pcre2 NOT_CBF_WITH_PCRE2)
+CBF_AUTO_INSTALL_DEPENDENCY(ZLIB zlib zlib zlib1g-dev zlib-devel zlib NOT_CBF_WITH_HDF5)
+CBF_AUTO_INSTALL_DEPENDENCY(libaec libaec libaec libaec-dev libaec-devel libaec NOT_CBF_WITH_HDF5)
+CBF_AUTO_INSTALL_DEPENDENCY(SZIP libaec libaec libaec-dev libaec-devel libaec NOT_CBF_WITH_HDF5)
+CBF_AUTO_INSTALL_DEPENDENCY(HDF5 hdf5 hdf5 libhdf5-dev hdf5-devel hdf5 NOT_CBF_WITH_HDF5)
 
 set(CBF__SRC       "${CBFlib_SOURCE_DIR}/src" )
 set(CBF__INCLUDE   "${CBFlib_SOURCE_DIR}/include" )
@@ -647,6 +658,11 @@ if(CBF_WITH_HDF5)
     "https://github.com/madler/zlib/releases/download/v1.3.1"
     CACHE INTERNAL
     "Use zlib from original location")
+
+  # Try to use system libraries first (installed by auto-install macro)
+  set(HDF5_ZLIB_USE_EXTERNAL ON CACHE BOOL "" FORCE)
+  set(HDF5_SZIP_USE_EXTERNAL ON CACHE BOOL "" FORCE)
+
   fetchcontent_makeavailable(hdf5)
 
   set(_h5dump_executable
@@ -656,6 +672,7 @@ if(CBF_WITH_HDF5)
   else()
     set(_hdf5_target hdf5-static)
   endif()
+
 else()
   if(WIN32)
     find_package(HDF5 REQUIRED CONFIG)
@@ -2826,7 +2843,7 @@ if(BUILD_SHARED_LIBS AND CBF_ENABLE_PYTHON)
       "${CBF__DATA}/pycbf_test1.raw")
   set_tests_properties(pycbf-test1 PROPERTIES
     ENVIRONMENT "PYTHONPATH=$<TARGET_FILE_DIR:pycbf>"
-    FIXTURES_REQUIRED "img2cif-flatpacked-cif"
+    FIXTURES_REQUIRED "testhdf5;img2cif-flatpacked-cif"
     FIXTURES_SETUP pycbf-test1
     REQUIRED_FILES "${CMAKE_CURRENT_SOURCE_DIR}/pycbf/pycbf_test1.py")
 
@@ -2866,7 +2883,7 @@ if(BUILD_SHARED_LIBS AND CBF_ENABLE_PYTHON)
       "${CBF__DATA}/pycbf_test2.raw")
   set_tests_properties(pycbf-test2 PROPERTIES
     ENVIRONMENT "PYTHONPATH=$<TARGET_FILE_DIR:pycbf>"
-    FIXTURES_REQUIRED "convert_image-adscimg"
+    FIXTURES_REQUIRED "testhdf5;convert_image-adscimg"
     FIXTURES_SETUP pycbf-test2
     REQUIRED_FILES "${CMAKE_CURRENT_SOURCE_DIR}/pycbf/pycbf_test2.py")
 
@@ -2903,6 +2920,7 @@ if(BUILD_SHARED_LIBS AND CBF_ENABLE_PYTHON)
     COMMAND Python::Interpreter
       "${CMAKE_CURRENT_SOURCE_DIR}/pycbf/pycbf_test3.py")
   set_tests_properties(pycbf-test3 PROPERTIES
+    FIXTURES_REQUIRED "testhdf5"
     ENVIRONMENT "PYTHONPATH=$<TARGET_FILE_DIR:pycbf>"
     REQUIRED_FILES "${CMAKE_CURRENT_SOURCE_DIR}/pycbf/pycbf_test3.py")
 
@@ -2915,7 +2933,7 @@ if(BUILD_SHARED_LIBS AND CBF_ENABLE_PYTHON)
       "${CBF__DATA}/newtest1.cbf")
   set_tests_properties(pycbf-test4 PROPERTIES
     ENVIRONMENT "PYTHONPATH=$<TARGET_FILE_DIR:pycbf>"
-    FIXTURES_REQUIRED "img2cif-flatpacked-cif"
+    FIXTURES_REQUIRED "testhdf5;img2cif-flatpacked-cif"
     FIXTURES_SETUP pycbf-test4
     REQUIRED_FILES "${CMAKE_CURRENT_SOURCE_DIR}/pycbf/pycbf_test4.py")
 
