@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.10)
+project(HDF5_TEST)
+include(config/cmake/HDF5Macros.cmake)
+add_library(test_target STATIC examples/testulp.c)
+H5_SET_LIB_OPTIONS(test_target test_name STATIC 0)

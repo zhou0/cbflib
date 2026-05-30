@@ -640,7 +640,7 @@ endif()
 # CMakePresets.json.  Set _h5dump_executable to the path to h5dump and
 # _hdf5_target to the real (unaliased) HDF5 target.
 
-if(CBF_AUTO_hdf5_FOUND OR HDF5_FOUND)
+if(FALSE OR HDF5_FOUND)
   set(CBF_WITH_HDF5 OFF CACHE BOOL "Link against system HDF5 library" FORCE)
 else()
   if(WIN32)

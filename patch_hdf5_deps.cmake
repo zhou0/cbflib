@@ -6,9 +6,14 @@ macro(patch_file FILE_PATH SEARCH REPLACE)
   endif()
 endmacro()
 
-patch_file("${hdf5_SOURCE_DIR}/config/cmake/ZLIB/CMakeLists.txt" " STATIC " " SHARED ")
-patch_file("${hdf5_SOURCE_DIR}/config/cmake/ZLIB/CMakeLists.txt" "zlib-static" "zlib")
-patch_file("${hdf5_SOURCE_DIR}/config/cmake/LIBAEC/CMakeLists.txt" " STATIC " " SHARED ")
-patch_file("${hdf5_SOURCE_DIR}/config/cmake/LIBAEC/CMakeLists.txt" "-static" "")
-patch_file("${hdf5_SOURCE_DIR}/config/cmake/HDFLibMacros.cmake" "STATIC" "SHARED")
-patch_file("${hdf5_SOURCE_DIR}/config/cmake/HDFLibMacros.cmake" "-static" "")
+# ZLIB patching
+patch_file("${hdf5_SOURCE_DIR}/config/cmake/ZLIB/CMakeLists.txt" "add_library(${ZLIB_LIB_TARGET} STATIC" "add_library(${ZLIB_LIB_TARGET} SHARED")
+# Correct H5_SET_LIB_OPTIONS call for ZLIB (it needs 4 arguments)
+patch_file("${hdf5_SOURCE_DIR}/config/cmake/ZLIB/CMakeLists.txt" "H5_SET_LIB_OPTIONS (${ZLIB_LIB_TARGET} \${ZLIB_LIB_NAME} STATIC 0)" "H5_SET_LIB_OPTIONS (${ZLIB_LIB_TARGET} \${ZLIB_LIB_NAME} SHARED ZLIB)")
+
+# LIBAEC patching
+patch_file("${hdf5_SOURCE_DIR}/config/cmake/LIBAEC/CMakeLists.txt" "add_library (\${LIBAEC_LIB_TARGET} STATIC" "add_library (\${LIBAEC_LIB_TARGET} SHARED")
+patch_file("${hdf5_SOURCE_DIR}/config/cmake/LIBAEC/CMakeLists.txt" "add_library (\${SZIP_LIB_TARGET} STATIC" "add_library (\${SZIP_LIB_TARGET} SHARED")
+# Correct H5_SET_LIB_OPTIONS calls for LIBAEC/SZIP
+patch_file("${hdf5_SOURCE_DIR}/config/cmake/LIBAEC/CMakeLists.txt" "H5_SET_LIB_OPTIONS (\${LIBAEC_LIB_TARGET} \${LIBAEC_LIB_NAME} STATIC 0)" "H5_SET_LIB_OPTIONS (\${LIBAEC_LIB_TARGET} \${LIBAEC_LIB_NAME} SHARED SZIP)")
+patch_file("${hdf5_SOURCE_DIR}/config/cmake/LIBAEC/CMakeLists.txt" "H5_SET_LIB_OPTIONS (\${SZIP_LIB_TARGET} \${SZIP_LIB_NAME} STATIC 0)" "H5_SET_LIB_OPTIONS (\${SZIP_LIB_TARGET} \${SZIP_LIB_NAME} SHARED SZIP)")
