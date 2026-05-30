@@ -42,6 +42,52 @@ __doc__=""" pycbf - python bindings to the CBFlib library
 
 
 // Used later to pass back binary data
+// Suppress Warning 451: Setting a const char * variable may leak memory
+%immutable name;
+%immutable axis_path;
+%immutable do_path;
+%immutable ra_path;
+%immutable array_id;
+%immutable datablock_id;
+%immutable diffrn_id;
+%immutable diffrn_detector_id;
+%immutable diffrn_detector_element_id;
+%immutable diffrn_measurement_id;
+%immutable frame_id;
+%immutable scan_id;
+%immutable wavelength_id;
+%immutable value;
+%immutable datablock;
+%immutable saveframe;
+%immutable category;
+%immutable column;
+%immutable nxid_name;
+%immutable nxdetector_group_name;
+%immutable nxsample_name;
+%immutable nxbeam_name;
+%immutable nxinstrument_name;
+%immutable nxgoniometer_name;
+%immutable nxmonochromator_name;
+%immutable nxsource_name;
+%immutable nxdata_name;
+%immutable nxfilename;
+%immutable dbid_name;
+%immutable sfid_name;
+%immutable catid_name;
+%immutable colid_name;
+%immutable cbf_datablock;
+%immutable cbf_saveframe;
+%immutable cbf_category;
+%immutable cbf_column;
+%immutable great_grand_parent_name;
+%immutable grand_parent_name;
+%immutable parent_name;
+%immutable optstr;
+%immutable optval;
+%immutable options;
+
+
+
 %include "cstring.i"
 
 // Attempt to autogenerate what SWIG thinks the call looks like

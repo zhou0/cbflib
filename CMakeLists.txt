@@ -652,11 +652,6 @@ if(CBF_WITH_HDF5)
     "https://github.com/MathisRosenhauer/libaec/releases/download/v1.1.3"
     CACHE INTERNAL
     "Use LIBAEC from original location")
-  set(ZLIB_BUILD_SHARED_LIBS ON CACHE BOOL "Build shared zlib" FORCE)
-  set(ZLIB_BUILD_STATIC_LIBS OFF CACHE BOOL "Build static zlib" FORCE)
-  set(LIBAEC_BUILD_SHARED_LIBS ON CACHE BOOL "Build shared libaec" FORCE)
-  set(LIBAEC_BUILD_STATIC_LIBS OFF CACHE BOOL "Build static libaec" FORCE)
-  set(HDF5_USE_LIBAEC_STATIC OFF CACHE BOOL "Use shared libaec" FORCE)
   set(ZLIB_TGZ_NAME "zlib-1.3.1.tar.gz" CACHE INTERNAL
     "Use HDF5_ZLib from compressed file")
   set(ZLIB_TGZ_ORIGPATH
@@ -665,8 +660,8 @@ if(CBF_WITH_HDF5)
     "Use zlib from original location")
 
   # Try to use system libraries first (installed by auto-install macro)
-  set(HDF5_ZLIB_USE_EXTERNAL ON CACHE BOOL "" FORCE)
-  set(HDF5_SZIP_USE_EXTERNAL ON CACHE BOOL "" FORCE)
+  set(ZLIB_USE_EXTERNAL ON CACHE BOOL "" FORCE)
+  set(SZIP_USE_EXTERNAL ON CACHE BOOL "" FORCE)
 
   fetchcontent_makeavailable(hdf5)
 
