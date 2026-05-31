@@ -479,7 +479,28 @@ CBF_AUTO_INSTALL_DEPENDENCY(SZIP libaec libaec libaec-dev libaec-devel libaec TR
 CBF_AUTO_INSTALL_DEPENDENCY(libpcre2-8 pcre2 pcre2 libpcre2-dev pcre2-devel pcre2 TRUE)
 CBF_AUTO_INSTALL_DEPENDENCY(TIFF SKIP SKIP libtiff-dev libtiff-devel libtiff TRUE)
 CBF_AUTO_INSTALL_DEPENDENCY(hdf5 hdf5 hdf5 libhdf5-dev hdf5-devel hdf5 TRUE)
+
 set(NOT_CBF_WITH_LIBTIFF NOT CBF_WITH_LIBTIFF)
+set(NOT_CBF_WITH_PCRE2 NOT CBF_WITH_PCRE2)
+set(NOT_CBF_WITH_HDF5 NOT CBF_WITH_HDF5)
+
+CBF_AUTO_INSTALL_DEPENDENCY(BISON SKIP SKIP bison bison bison TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(BZip2 bzip2 bzip2 libbz2-dev bzip2-devel bzip2 TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(libdeflate libdeflate libdeflate libdeflate-dev libdeflate-devel libdeflate TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(JPEG libjpeg-turbo libjpeg-turbo libjpeg-turbo8-dev libjpeg-turbo-devel libjpeg-turbo TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(JBIG jbigkit jbigkit libjbig-dev jbigkit-devel jbigkit TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(LERC lerc lerc liblerc-dev lerc-devel lerc TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(LibLZMA liblzma xz liblzma-dev xz-devel xz TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(zstd zstd zstd libzstd-dev libzstd-devel zstd TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(WebP libwebp webp libwebp-dev libwebp-devel libwebp TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(GLUT freeglut freeglut freeglut3-dev freeglut-devel freeglut TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(Editline SKIP libedit libedit-dev libedit-devel libedit TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(ZLIB zlib zlib zlib1g-dev zlib-devel zlib TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(libaec libaec libaec libaec-dev libaec-devel libaec TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(SZIP libaec libaec libaec-dev libaec-devel libaec TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(PCRE2 pcre2 pcre2 libpcre2-dev pcre2-devel pcre2 TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(TIFF SKIP SKIP libtiff-dev libtiff-devel libtiff TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(hdf5 hdf5 hdf5 libhdf5-dev hdf5-devel hdf5 TRUE)
 set(NOT_CBF_WITH_PCRE2 NOT CBF_WITH_PCRE2)
 set(NOT_CBF_WITH_HDF5 NOT CBF_WITH_HDF5)
 
@@ -561,7 +582,8 @@ fetchcontent_declare(data_output
 
 fetchcontent_declare(hdf5
   URL "https://github.com/HDFGroup/hdf5/releases/download/hdf5_1.14.6/hdf5-1.14.6.tar.gz"
-  URL_HASH MD5=63426c8e24086634eaf9179a8c5fe9e5)
+  URL_HASH MD5=63426c8e24086634eaf9179a8c5fe9e5
+  PATCH_COMMAND "${PATCH}" -p1 -i "${CMAKE_CURRENT_SOURCE_DIR}/patches/hdf5-1.14.6.patch")
 
 fetchcontent_declare(pcre2
   URL "https://github.com/PCRE2Project/pcre2/releases/download/pcre2-10.45/pcre2-10.45.tar.gz"
@@ -640,7 +662,7 @@ endif()
 # CMakePresets.json.  Set _h5dump_executable to the path to h5dump and
 # _hdf5_target to the real (unaliased) HDF5 target.
 
-if(FALSE OR HDF5_FOUND)
+if(CBF_AUTO_hdf5_FOUND OR HDF5_FOUND)
   set(CBF_WITH_HDF5 OFF CACHE BOOL "Link against system HDF5 library" FORCE)
 else()
   if(WIN32)
@@ -692,15 +714,7 @@ if(CBF_WITH_HDF5)
   set(LIBAEC_BUILD_STATIC_LIBS OFF CACHE BOOL "Build static libaec" FORCE)
   set(HDF5_USE_LIBAEC_STATIC OFF CACHE BOOL "Use shared libaec" FORCE)
 
-  FetchContent_GetProperties(hdf5)
-  if(NOT hdf5_POPULATED)
-    FetchContent_Populate(hdf5)
-    # Patch HDF5's internal ZLIB and LIBAEC to build as shared
-    message(STATUS "Patching internal HDF5 ZLIB and LIBAEC for shared build...")
-    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/patch_hdf5_deps.cmake" "${CMAKE_CURRENT_BINARY_DIR}/patch_hdf5_deps.cmake" COPYONLY)
-    include("${CMAKE_CURRENT_BINARY_DIR}/patch_hdf5_deps.cmake")
-    add_subdirectory(${hdf5_SOURCE_DIR} ${hdf5_BINARY_DIR})
-  endif()
+  fetchcontent_makeavailable(hdf5)
 
 
   set(_h5dump_executable

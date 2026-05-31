@@ -1,0 +1,31 @@
+--- a/config/cmake/ZLIB/CMakeLists.txt
++++ b/config/cmake/ZLIB/CMakeLists.txt
+@@ -191,7 +191,7 @@
+     zutil.c
+ )
+
+-add_library(${ZLIB_LIB_TARGET} STATIC ${ZLIB_SRCS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
++add_library(${ZLIB_LIB_TARGET} SHARED ${ZLIB_SRCS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
+ target_include_directories(${ZLIB_LIB_TARGET}
+     PRIVATE "${CMAKE_BINARY_DIR}"
+     PUBLIC "${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}"
+--- a/config/cmake/LIBAEC/CMakeLists.txt
++++ b/config/cmake/LIBAEC/CMakeLists.txt
+@@ -95,7 +95,7 @@
+     ${LIBAEC_SRC_DIR}/vector.c
+ )
+
+-add_library (${LIBAEC_LIB_TARGET} STATIC ${LIBAEC_SRCS} ${LIBAEC_PUBLIC_HEADERS})
++add_library (${LIBAEC_LIB_TARGET} SHARED ${LIBAEC_SRCS} ${LIBAEC_PUBLIC_HEADERS})
+ target_include_directories (${LIBAEC_LIB_TARGET} PUBLIC
+   "$<BUILD_INTERFACE:${LIBAEC_SOURCE_DIR}>"
+   "$<BUILD_INTERFACE:${LIBAEC_SOURCE_DIR}/include>"
+@@ -127,7 +127,7 @@
+     ${LIBAEC_INC_DIR}/szlib.h
+ )
+
+-add_library (${SZIP_LIB_TARGET} STATIC ${SZIP_SRCS} ${SZIP_PUBLIC_HEADERS})
++add_library (${SZIP_LIB_TARGET} SHARED ${SZIP_SRCS} ${SZIP_PUBLIC_HEADERS})
+ target_include_directories (${SZIP_LIB_TARGET} PUBLIC "${LIBAEC_SOURCE_DIR};${LIBAEC_SOURCE_DIR}/include;${CMAKE_BINARY_DIR}")
+ TARGET_C_PROPERTIES (${SZIP_LIB_TARGET} STATIC)
+ target_link_libraries (${SZIP_LIB_TARGET} PRIVATE ${LIBAEC_LIB_TARGET})

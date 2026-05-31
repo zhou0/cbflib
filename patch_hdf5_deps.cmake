@@ -8,12 +8,20 @@ endmacro()
 
 # ZLIB patching
 patch_file("${hdf5_SOURCE_DIR}/config/cmake/ZLIB/CMakeLists.txt" "add_library(${ZLIB_LIB_TARGET} STATIC" "add_library(${ZLIB_LIB_TARGET} SHARED")
-# Correct H5_SET_LIB_OPTIONS call for ZLIB (it needs 4 arguments)
-patch_file("${hdf5_SOURCE_DIR}/config/cmake/ZLIB/CMakeLists.txt" "H5_SET_LIB_OPTIONS (${ZLIB_LIB_TARGET} \${ZLIB_LIB_NAME} STATIC 0)" "H5_SET_LIB_OPTIONS (${ZLIB_LIB_TARGET} \${ZLIB_LIB_NAME} SHARED ZLIB)")
 
 # LIBAEC patching
-patch_file("${hdf5_SOURCE_DIR}/config/cmake/LIBAEC/CMakeLists.txt" "add_library (\${LIBAEC_LIB_TARGET} STATIC" "add_library (\${LIBAEC_LIB_TARGET} SHARED")
-patch_file("${hdf5_SOURCE_DIR}/config/cmake/LIBAEC/CMakeLists.txt" "add_library (\${SZIP_LIB_TARGET} STATIC" "add_library (\${SZIP_LIB_TARGET} SHARED")
-# Correct H5_SET_LIB_OPTIONS calls for LIBAEC/SZIP
-patch_file("${hdf5_SOURCE_DIR}/config/cmake/LIBAEC/CMakeLists.txt" "H5_SET_LIB_OPTIONS (\${LIBAEC_LIB_TARGET} \${LIBAEC_LIB_NAME} STATIC 0)" "H5_SET_LIB_OPTIONS (\${LIBAEC_LIB_TARGET} \${LIBAEC_LIB_NAME} SHARED SZIP)")
-patch_file("${hdf5_SOURCE_DIR}/config/cmake/LIBAEC/CMakeLists.txt" "H5_SET_LIB_OPTIONS (\${SZIP_LIB_TARGET} \${SZIP_LIB_NAME} STATIC 0)" "H5_SET_LIB_OPTIONS (\${SZIP_LIB_TARGET} \${SZIP_LIB_NAME} SHARED SZIP)")
+patch_file("${hdf5_SOURCE_DIR}/config/cmake/LIBAEC/CMakeLists.txt" "add_library (${LIBAEC_LIB_TARGET} STATIC" "add_library (${LIBAEC_LIB_TARGET} SHARED")
+patch_file("${hdf5_SOURCE_DIR}/config/cmake/LIBAEC/CMakeLists.txt" "add_library (${SZIP_LIB_TARGET} STATIC" "add_library (${SZIP_LIB_TARGET} SHARED")
+
+# Macro fix for SHARED
+patch_file("${hdf5_SOURCE_DIR}/config/cmake/HDF5Macros.cmake"
+           "macro (H5_SET_LIB_OPTIONS libtarget libname libtype libpackage)"
+           "macro (H5_SET_LIB_OPTIONS libtarget libname libtype)\n  set(libpackage \"\${ARGN}\")\n  if(\"\${libpackage}\" STREQUAL \"\")\n    set(libpackage \"HDF5\")\n  endif()")
+
+# Ensure HDF5 links correctly to its internal shared SZIP/ZLIB
+patch_file("${hdf5_SOURCE_DIR}/CMakeFilters.cmake"
+           "set (H5_SZIP_LIBRARIES \${H5_SZIP_STATIC_LIBRARY})"
+           "set (H5_SZIP_LIBRARIES \${H5_SZIP_SHARED_LIBRARY})")
+patch_file("${hdf5_SOURCE_DIR}/CMakeFilters.cmake"
+           "set (H5_ZLIB_LIBRARIES \${H5_ZLIB_STATIC_LIBRARY})"
+           "set (H5_ZLIB_LIBRARIES \${H5_ZLIB_SHARED_LIBRARY})")
