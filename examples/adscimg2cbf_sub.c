@@ -513,7 +513,7 @@ int	adscimg2cbf_sub2(char *header,
     
     const char *direction [2];
     
-    char	s[1024], s1[1024], facility[256], temp[1024];
+    char	s[1024], s1[1024], facility[256], temp[2050];
     char  	detector_mode[40];
     char	smv_date[100], cbf_date[100];
     int   	smv_size1, smv_size2;

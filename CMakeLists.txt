@@ -403,7 +403,7 @@ macro(CBF_AUTO_INSTALL_DEPENDENCY FIND_NAME VCPKG_NAME PORT_NAME APT_NAME DNF_NA
       endif()
     else()
       find_package(${FIND_NAME} QUIET)
-      if(${FIND_NAME}_FOUND OR ${FIND_NAME}_Found OR ${${FIND_NAME}_FOUND})
+      if(${FIND_NAME}_FOUND OR ${FIND_NAME}_Found)
         set(_FOUND TRUE)
       endif()
     endif()
@@ -411,8 +411,8 @@ macro(CBF_AUTO_INSTALL_DEPENDENCY FIND_NAME VCPKG_NAME PORT_NAME APT_NAME DNF_NA
     if(NOT _FOUND)
       find_package(PkgConfig QUIET)
       if(PKG_CONFIG_FOUND)
-        pkg_check_modules(CBF_AUTO_${FIND_NAME} QUIET ${FIND_NAME})
-        if(CBF_AUTO_${FIND_NAME}_FOUND)
+        pkg_check_modules(CBF_AUTO_${FIND_NAME}_PKG QUIET ${FIND_NAME})
+        if(CBF_AUTO_${FIND_NAME}_PKG_FOUND)
           set(_FOUND TRUE)
         endif()
       endif()
@@ -444,35 +444,94 @@ macro(CBF_AUTO_INSTALL_DEPENDENCY FIND_NAME VCPKG_NAME PORT_NAME APT_NAME DNF_NA
       if(_install_res EQUAL 0)
         message(STATUS "Successfully installed ${FIND_NAME}. Retrying find_package...")
         find_package(${FIND_NAME} QUIET)
+        if(${FIND_NAME}_FOUND OR ${FIND_NAME}_Found)
+          set(_FOUND TRUE)
+        endif()
       else()
         if(NOT _FOUND)
           message(WARNING "Failed to install ${FIND_NAME} (or installation skipped).")
         endif()
       endif()
     endif()
+    if(_FOUND)
+      set(CBF_AUTO_${FIND_NAME}_FOUND TRUE CACHE INTERNAL "")
+    else()
+      set(CBF_AUTO_${FIND_NAME}_FOUND FALSE CACHE INTERNAL "")
+    endif()
   endif()
 endmacro()
 
+CBF_AUTO_INSTALL_DEPENDENCY(BISON SKIP SKIP bison bison bison TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(BZip2 bzip2 bzip2 libbz2-dev bzip2-devel bzip2 TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(libdeflate libdeflate libdeflate libdeflate-dev libdeflate-devel libdeflate TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(JPEG libjpeg-turbo libjpeg-turbo libjpeg-turbo8-dev libjpeg-turbo-devel libjpeg-turbo TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(JBIG jbigkit jbigkit libjbig-dev jbigkit-devel jbigkit TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(LERC lerc lerc liblerc-dev lerc-devel lerc TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(LibLZMA liblzma xz liblzma-dev xz-devel xz TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(zstd zstd zstd libzstd-dev libzstd-devel zstd TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(WebP libwebp webp libwebp-dev libwebp-devel libwebp TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(GLUT freeglut freeglut freeglut3-dev freeglut-devel freeglut TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(Editline SKIP libedit libedit-dev libedit-devel libedit TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(CQRlib cqrlib cqrlib libcqr-dev cqrlib-devel cqrlib TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(ZLIB zlib zlib zlib1g-dev zlib-devel zlib TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(libaec libaec libaec libaec-dev libaec-devel libaec TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(SZIP libaec libaec libaec-dev libaec-devel libaec TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(libpcre2-8 pcre2 pcre2 libpcre2-dev pcre2-devel pcre2 TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(TIFF SKIP SKIP libtiff-dev libtiff-devel libtiff TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(hdf5 hdf5 hdf5 libhdf5-dev hdf5-devel hdf5 TRUE)
+
+
+find_package(PkgConfig QUIET)
+if(NOT PKG_CONFIG_FOUND)
+  message(STATUS "PkgConfig not found. Attempting to install...")
+  set(_pkg_install_res 1)
+  if(WIN32)
+    execute_process(COMMAND vcpkg install pkgconf RESULT_VARIABLE _pkg_install_res)
+  elseif(APPLE)
+    execute_process(COMMAND sudo port install pkgconfig RESULT_VARIABLE _pkg_install_res)
+  elseif(UNIX AND NOT APPLE)
+    find_program(APT_COMMAND apt-get)
+    find_program(DNF_COMMAND dnf)
+    find_program(PACMAN_COMMAND pacman)
+    if(APT_COMMAND)
+      execute_process(COMMAND sudo apt-get install -y pkg-config RESULT_VARIABLE _pkg_install_res)
+    elseif(DNF_COMMAND)
+      execute_process(COMMAND sudo dnf install -y pkgconf-pkg-config RESULT_VARIABLE _pkg_install_res)
+    elseif(PACMAN_COMMAND)
+      execute_process(COMMAND sudo pacman -S --noconfirm pkgconf RESULT_VARIABLE _pkg_install_res)
+    endif()
+  endif()
+  if(_pkg_install_res EQUAL 0)
+    message(STATUS "Successfully installed PkgConfig. Retrying find_package...")
+    find_package(PkgConfig QUIET)
+  else()
+    message(WARNING "Failed to install PkgConfig.")
+  endif()
+endif()
 set(NOT_CBF_WITH_LIBTIFF NOT CBF_WITH_LIBTIFF)
 set(NOT_CBF_WITH_PCRE2 NOT CBF_WITH_PCRE2)
 set(NOT_CBF_WITH_HDF5 NOT CBF_WITH_HDF5)
 
 CBF_AUTO_INSTALL_DEPENDENCY(BISON SKIP SKIP bison bison bison TRUE)
-CBF_AUTO_INSTALL_DEPENDENCY(BZip2 bzip2 bzip2 libbz2-dev bzip2-devel bzip2 NOT_CBF_WITH_LIBTIFF)
-CBF_AUTO_INSTALL_DEPENDENCY(libdeflate libdeflate libdeflate libdeflate-dev libdeflate-devel libdeflate NOT_CBF_WITH_LIBTIFF)
-CBF_AUTO_INSTALL_DEPENDENCY(JPEG libjpeg-turbo libjpeg-turbo libjpeg-turbo8-dev libjpeg-turbo-devel libjpeg-turbo NOT_CBF_WITH_LIBTIFF)
-CBF_AUTO_INSTALL_DEPENDENCY(JBIG jbigkit jbigkit libjbig-dev jbigkit-devel jbigkit NOT_CBF_WITH_LIBTIFF)
-CBF_AUTO_INSTALL_DEPENDENCY(LERC lerc lerc liblerc-dev lerc-devel lerc NOT_CBF_WITH_LIBTIFF)
-CBF_AUTO_INSTALL_DEPENDENCY(LibLZMA liblzma xz liblzma-dev xz-devel xz NOT_CBF_WITH_LIBTIFF)
-CBF_AUTO_INSTALL_DEPENDENCY(zstd zstd zstd libzstd-dev libzstd-devel zstd NOT_CBF_WITH_LIBTIFF)
-CBF_AUTO_INSTALL_DEPENDENCY(WebP libwebp webp libwebp-dev libwebp-devel libwebp NOT_CBF_WITH_LIBTIFF)
+CBF_AUTO_INSTALL_DEPENDENCY(BZip2 bzip2 bzip2 libbz2-dev bzip2-devel bzip2 TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(libdeflate libdeflate libdeflate libdeflate-dev libdeflate-devel libdeflate TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(JPEG libjpeg-turbo libjpeg-turbo libjpeg-turbo8-dev libjpeg-turbo-devel libjpeg-turbo TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(JBIG jbigkit jbigkit libjbig-dev jbigkit-devel jbigkit TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(LERC lerc lerc liblerc-dev lerc-devel lerc TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(LibLZMA liblzma xz liblzma-dev xz-devel xz TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(zstd zstd zstd libzstd-dev libzstd-devel zstd TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(WebP libwebp webp libwebp-dev libwebp-devel libwebp TRUE)
 CBF_AUTO_INSTALL_DEPENDENCY(GLUT freeglut freeglut freeglut3-dev freeglut-devel freeglut TRUE)
 CBF_AUTO_INSTALL_DEPENDENCY(Editline SKIP libedit libedit-dev libedit-devel libedit TRUE)
-CBF_AUTO_INSTALL_DEPENDENCY(PCRE2 pcre2 pcre2 libpcre2-dev pcre2-devel pcre2 NOT_CBF_WITH_PCRE2)
-CBF_AUTO_INSTALL_DEPENDENCY(ZLIB zlib zlib zlib1g-dev zlib-devel zlib NOT_CBF_WITH_HDF5)
-CBF_AUTO_INSTALL_DEPENDENCY(libaec libaec libaec libaec-dev libaec-devel libaec NOT_CBF_WITH_HDF5)
-CBF_AUTO_INSTALL_DEPENDENCY(SZIP libaec libaec libaec-dev libaec-devel libaec NOT_CBF_WITH_HDF5)
-CBF_AUTO_INSTALL_DEPENDENCY(HDF5 hdf5 hdf5 libhdf5-dev hdf5-devel hdf5 NOT_CBF_WITH_HDF5)
+CBF_AUTO_INSTALL_DEPENDENCY(ZLIB zlib zlib zlib1g-dev zlib-devel zlib TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(libaec libaec libaec libaec-dev libaec-devel libaec TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(SZIP libaec libaec libaec-dev libaec-devel libaec TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(PCRE2 pcre2 pcre2 libpcre2-dev pcre2-devel pcre2 TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(TIFF SKIP SKIP libtiff-dev libtiff-devel libtiff TRUE)
+CBF_AUTO_INSTALL_DEPENDENCY(hdf5 hdf5 hdf5 libhdf5-dev hdf5-devel hdf5 TRUE)
+set(NOT_CBF_WITH_PCRE2 NOT CBF_WITH_PCRE2)
+set(NOT_CBF_WITH_HDF5 NOT CBF_WITH_HDF5)
+
 
 set(CBF__SRC       "${CBFlib_SOURCE_DIR}/src" )
 set(CBF__INCLUDE   "${CBFlib_SOURCE_DIR}/include" )
@@ -551,7 +610,8 @@ fetchcontent_declare(data_output
 
 fetchcontent_declare(hdf5
   URL "https://github.com/HDFGroup/hdf5/releases/download/hdf5_1.14.6/hdf5-1.14.6.tar.gz"
-  URL_HASH MD5=63426c8e24086634eaf9179a8c5fe9e5)
+  URL_HASH MD5=63426c8e24086634eaf9179a8c5fe9e5
+  PATCH_COMMAND "${PATCH}" -p1 -i "${CMAKE_CURRENT_SOURCE_DIR}/patches/hdf5-1.14.6.patch")
 
 fetchcontent_declare(pcre2
   URL "https://github.com/PCRE2Project/pcre2/releases/download/pcre2-10.45/pcre2-10.45.tar.gz"
@@ -570,9 +630,14 @@ set(libm "$<$<NOT:$<C_COMPILER_ID:MSVC>>:m>")
 
 #
 # CQRlib
-set(CBF_WITH_CQRLIB ON CACHE BOOL
-  "Link against internally built CQRlib library")
+
+if(CBF_AUTO_CQRlib_FOUND)
+  set(CBF_WITH_CQRLIB OFF CACHE BOOL "Link against system CQRlib library" FORCE)
+else()
+  set(CBF_WITH_CQRLIB ON CACHE BOOL "Link against internally built CQRlib library" FORCE)
+endif()
 mark_as_advanced(CBF_WITH_CQRLIB)
+
 
 if(CBF_WITH_CQRLIB)
   fetchcontent_makeavailable(cqrlib)
@@ -624,14 +689,18 @@ endif()
 # {LIBAEC,ZLIB}_TGZ_{NAME,ORIGPATH} values taken from
 # CMakePresets.json.  Set _h5dump_executable to the path to h5dump and
 # _hdf5_target to the real (unaliased) HDF5 target.
-if(WIN32)
-  set(CBF_WITH_HDF5 OFF CACHE BOOL
-    "Link against internally built HDF5 library")
+
+if(CBF_AUTO_hdf5_FOUND OR HDF5_FOUND)
+  set(CBF_WITH_HDF5 OFF CACHE BOOL "Link against system HDF5 library" FORCE)
 else()
-  set(CBF_WITH_HDF5 ON CACHE BOOL
-    "Link against internally built HDF5 library")
+  if(WIN32)
+    set(CBF_WITH_HDF5 OFF CACHE BOOL "Link against internally built HDF5 library" FORCE)
+  else()
+    set(CBF_WITH_HDF5 ON CACHE BOOL "Link against internally built HDF5 library" FORCE)
+  endif()
 endif()
 mark_as_advanced(CBF_WITH_HDF5)
+
 
 set(HDF5REGISTER "--register" "manual" CACHE INTERNAL
   "Flags to register HDF5 plugins")
@@ -663,7 +732,18 @@ if(CBF_WITH_HDF5)
   set(ZLIB_USE_EXTERNAL ON CACHE BOOL "" FORCE)
   set(SZIP_USE_EXTERNAL ON CACHE BOOL "" FORCE)
 
+
+  # Try to use system libraries first (installed by auto-install macro)
+  set(HDF5_ZLIB_USE_EXTERNAL ON CACHE BOOL "" FORCE)
+  set(HDF5_SZIP_USE_EXTERNAL ON CACHE BOOL "" FORCE)
+  set(ZLIB_BUILD_SHARED_LIBS ON CACHE BOOL "Build shared zlib" FORCE)
+  set(ZLIB_BUILD_STATIC_LIBS OFF CACHE BOOL "Build static zlib" FORCE)
+  set(LIBAEC_BUILD_SHARED_LIBS ON CACHE BOOL "Build shared libaec" FORCE)
+  set(LIBAEC_BUILD_STATIC_LIBS OFF CACHE BOOL "Build static libaec" FORCE)
+  set(HDF5_USE_LIBAEC_STATIC OFF CACHE BOOL "Use shared libaec" FORCE)
+
   fetchcontent_makeavailable(hdf5)
+
 
   set(_h5dump_executable
     "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/h5dump${CMAKE_EXECUTABLE_SUFFIX}")
@@ -697,7 +777,10 @@ else()
   else()
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(hdf5 REQUIRED IMPORTED_TARGET hdf5>=1.10)
-    find_program(_h5dump_executable h5dump REQUIRED)
+    find_program(_h5dump_executable h5dump)
+    if(NOT _h5dump_executable)
+      set(_h5dump_executable "h5dump")
+    endif()
     set(_hdf5_target PkgConfig::hdf5)
   endif()
 endif()
@@ -735,9 +818,14 @@ endif()
 
 #
 # PCRE2
-set(CBF_WITH_PCRE2 ON CACHE BOOL
-  "Link against internally built Perl-compatible regular expressions library")
+
+if(CBF_AUTO_libpcre2-8_FOUND OR PCRE2_FOUND OR PCRE2_8_FOUND)
+  set(CBF_WITH_PCRE2 OFF CACHE BOOL "Link against system PCRE2 library" FORCE)
+else()
+  set(CBF_WITH_PCRE2 ON CACHE BOOL "Link against internally built PCRE2 library" FORCE)
+endif()
 mark_as_advanced(CBF_WITH_PCRE2)
+
 
 if(CBF_WITH_PCRE2)
   set(PCRE2_BUILD_PCRE2GREP OFF CACHE INTERNAL "Build pcre2grep")
@@ -761,9 +849,14 @@ endif()
 #
 # LibTIFF to support tiff2cbf.  Disable tests if building in-tree; the
 # tiff-tests cache variable was introduced in LibTIFF 4.5.0.
-set(CBF_WITH_LIBTIFF ON CACHE BOOL
-  "Link against internally built LibTIFF library")
+
+if(CBF_AUTO_TIFF_FOUND OR TIFF_FOUND)
+  set(CBF_WITH_LIBTIFF OFF CACHE BOOL "Link against system LibTIFF library" FORCE)
+else()
+  set(CBF_WITH_LIBTIFF ON CACHE BOOL "Link against internally built LibTIFF library" FORCE)
+endif()
 mark_as_advanced(CBF_WITH_LIBTIFF)
+
 
 if(CBF_WITH_LIBTIFF)
   # TIFFFieldSetGetSize() was introduced in LibTIFF 4.4.0
